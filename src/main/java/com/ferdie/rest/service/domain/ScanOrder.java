@@ -7,29 +7,29 @@ import org.json.simple.parser.ParseException;
 
 public class ScanOrder {
 
-	private Long id;
+	private Long orderId;
+	private Long scannerId;
+	private Long scanId;
 	private String message;
 	private String status;
 	private String result;
 	
+	public ScanOrder(Long scannerId, String result) {
+		this(result);
+		this.scannerId = scannerId;
+		this.status = "Running";
+	}
+	
 	public ScanOrder(String result) {
 		parseJsonString(result);
 	}
-	
+
 	public ScanOrder() {
 	}
 
 	@Override
 	public String toString() {
-		return "ScanOrder[id="+ id + ", message=" + message + ", status="+ status +", success="+isSuccess()+"]";
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+		return "ScanOrder[orderId="+ orderId + ", scanId="+ scanId + ", scannerId="+ scannerId + ", message=" + message + ", status="+ status +", success="+isSuccess()+"]";
 	}
 
 	public String getMessage() {
@@ -49,7 +49,7 @@ public class ScanOrder {
 	}
 	
 	public boolean isSuccess() {
-		return null != id;
+		return null != this.orderId;
 	}
 
 	public void parseJsonString(String result) {
@@ -59,7 +59,7 @@ public class ScanOrder {
 			JSONObject json;
 			try {
 				json = (JSONObject) parser.parse(result);
-				id = (Long) json.get("id");
+				orderId = (Long) json.get("id");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
 				System.err.println(e.getMessage());
@@ -74,6 +74,30 @@ public class ScanOrder {
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+
+	public Long getScanId() {
+		return scanId;
+	}
+
+	public void setScanId(Long scanId) {
+		this.scanId = scanId;
+	}
+
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public Long getScannerId() {
+		return scannerId;
+	}
+
+	public void setScannerId(Long scannerId) {
+		this.scannerId = scannerId;
 	}
 
 }

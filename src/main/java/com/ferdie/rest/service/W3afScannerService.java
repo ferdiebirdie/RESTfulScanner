@@ -16,6 +16,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.json.simple.JSONArray;
@@ -24,13 +25,14 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.ferdie.rest.mongo.MongoUtil;
 import com.ferdie.rest.service.domain.ScanAction;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
 
 public class W3afScannerService implements ScannerService {
-	
-	private String baseUrl = "http://127.0.0.1:5000";
+	final static Logger log = Logger.getLogger(W3afScannerService.class);
+	private static String WS_URL = "http://127.0.0.1:5000";
 	
 	public ScanOrder scan(List<String> targetUrls) {
 		if (hasRunningScan()) {
@@ -38,15 +40,16 @@ public class W3afScannerService implements ScannerService {
 		}
 		List<Long> ids = getCompletedScanIds();
 		if (null != ids && ids.size() > 0) {
-			System.out.println("Deleting completed scans...");
+			log.debug("Deleting completed scans...");
+			
 			for (Long id : ids) {
 				deleteScan(id);
 			}
-			System.out.println("Deleted Ids: " + ids);
+			log.debug("Deleted Ids: " + ids);
 		}
-		System.out.println("Starting scan...");
+		log.debug("Starting scan...");
 		Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
-		WebTarget webTarget = client.target(baseUrl + "/scans/");
+		WebTarget webTarget = client.target(WS_URL + "/scans/");
 		 
 		Map<String, Object> json = new LinkedHashMap<String, Object>();
 		json.put("scan_profile", getProfile());
@@ -58,53 +61,48 @@ public class W3afScannerService implements ScannerService {
 		Response response = invocationBuilder.post(Entity.entity(input, MediaType.APPLICATION_JSON));
 		 
 		String result = response.readEntity(String.class);
-		ScanOrder scan = new ScanOrder(result);
-		System.out.println("Scan result: " + scan);
+		ScanOrder scan = new ScanOrder(getScannerId(), result);
 		return scan;
 		
 	}
 	
 	public String deleteScan(Long id) {
-		return manageScans(ScanAction.DELETE, id);
+		return manageScanOrder(ScanAction.DELETE, id);
 	}
 
-	public String getScanStatus(Long id) {
-		return manageScans(ScanAction.GET_STATUS, id);
+	public String getScanStatus(Long orderId) {
+		return manageScanOrder(ScanAction.GET_STATUS, orderId);
 	}
-
-	/*public String getScanLogs(Long id) {
-		return manageScans(ScanAction.GET_LOGS, id);
-	}*/
 
 	public String getActiveScans() {
-		return manageScans(ScanAction.GET_ACTIVE_SCANS, null);
+		return manageScanOrder(ScanAction.GET_ACTIVE_SCANS, null);
 	}
 
-	private String manageScans(ScanAction action, Long scanId) {
-		return manageScans(action, scanId, null);
+	private String manageScanOrder(ScanAction action, Long orderId) {
+		return manageScanOrder(action, orderId, null);
 	}
 	
-	private String manageScans(ScanAction action, Long scanId, Long detailId) {
+	private String manageScanOrder(ScanAction action, Long orderId, Long detailId) {
 		String reqUrl = "/scans/";
 		switch (action) {
 			case GET_STATUS:
-				reqUrl = reqUrl + scanId + "/status";
+				reqUrl = reqUrl + orderId + "/status";
 				break;
 			case GET_LOGS:
-				reqUrl = reqUrl + scanId + "/log";
+				reqUrl = reqUrl + orderId + "/log";
 				break;
 			case GET_VULN_ALL:
-				reqUrl = reqUrl + scanId + "/kb/";
+				reqUrl = reqUrl + orderId + "/kb/";
 				break;
 			case GET_VULN_BY_ID:
-				reqUrl = reqUrl + scanId + "/kb/" + detailId;
+				reqUrl = reqUrl + orderId + "/kb/" + detailId;
 				break;
 				
 			case DELETE:
-				reqUrl = reqUrl + scanId;
+				reqUrl = reqUrl + orderId;
 				
 				Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
-				WebTarget webTarget = client.target(baseUrl + reqUrl);
+				WebTarget webTarget = client.target(WS_URL + reqUrl);
 				 
 				Invocation.Builder invocationBuilder =  webTarget.request();
 				Response response = invocationBuilder.delete();
@@ -116,7 +114,7 @@ public class W3afScannerService implements ScannerService {
 				break;
 		}
 		Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
-		WebTarget webTarget = client.target(baseUrl + reqUrl);
+		WebTarget webTarget = client.target(WS_URL + reqUrl);
 		 
 		Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
@@ -129,7 +127,7 @@ public class W3afScannerService implements ScannerService {
 		try {
 			return new String(Files.readAllBytes(Paths.get("/home/ferdie/w3af/profiles/fast_scan.pw3af")));
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 		return "";
 	}
@@ -148,12 +146,12 @@ public class W3afScannerService implements ScannerService {
 					if ("Stopped".equalsIgnoreCase(status)) {
 						ids.add(id);
 					} else {
-						System.out.println("Skipped: [Id=" + id + ", Status=" + status + "]");
+						log.debug("Skipped: [Id=" + id + ", Status=" + status + "]");
 					}
 				}
 			}
 		} catch (ParseException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 		return ids;
 	}
@@ -172,67 +170,101 @@ public class W3afScannerService implements ScannerService {
 				}
 			}
 		} catch (ParseException e) {
-			System.err.println(e.getMessage());
+			log.error("Parsing error: ", e);
 			return false;
 		}
 		return false;
 	}
 
 	public void save(final ScanOrder scan) {
-		new Thread(new Runnable() {
-			public void run() {
-				final int waitingTime = 60;
-				while(true) {
-					if (hasRunningScan()) {
-						System.err.println("********************** Waiting for another "+ waitingTime +"sec **********************");
-						try {
-							Thread.sleep(waitingTime*1000);
-						} catch (InterruptedException e) {
-							System.err.println("Error in saveResult()... " + e.getMessage());
+		if (!scan.isSuccess()) {
+			return;
+		}
+		try {
+			if (null == scan.getScanId()) {
+				Long scanId = MongoUtil.getInstance().createScan(scan.getScannerId(), scan.getOrderId());
+				scan.setScanId(scanId);
+			}
+			// sleep 10sec to give enough time for w3af 
+			try {
+				log.debug("Sleeping for 10sec..");
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				log.error("Error: ", e);
+			}
+			
+			Runnable r = new Runnable() {
+		         public void run() {
+					final int waitingTime = 60;
+					while(true) {
+						boolean running = hasRunningScan();
+						if (running) {
+							log.debug("********************** Waiting for another "+ waitingTime +"sec **********************");
+							try {
+								Thread.sleep(waitingTime*1000);
+							} catch (InterruptedException e) {
+								log.error("Error while sleeping", e);
+								break;
+							}
+						} else {
+							log.debug("Calling saveVulners()");
+							saveVulners(scan.getScanId());
 							break;
 						}
-					} else {
-						saveInDB(scan);
-						break;
 					}
-				}
-			}
-		}).run();
+		         }
+			};
+			new Thread(r).start();
+
+		} catch (Exception e1) {
+			log.error(e1);
+		}
 	}
 	
-	public void saveInDB(ScanOrder scan) {
-		System.out.println("Saving results in DB");
-		JSONParser parser = new JSONParser();
-		JSONObject json;
+	public void saveVulners(Long scanId) {
+		Long orderId;
 		try {
-			Long scanId = scan.getId();
-			
-			String kbALl = manageScans(ScanAction.GET_VULN_ALL, scanId);
-			// master table: (PK, FK=scanner_id, raw_kb)
-			System.out.println("Saving KB List Results: PK=<Autogenerated>, FK=" + getScannerId() + ", DATA=" + kbALl);
-			// child table: (PK, FK=master_pk, detailed_kb)
-			Long idMaster = 999L; // TODO: get real value from DB
-			
-			json = (JSONObject) parser.parse(kbALl);
-			JSONArray items = (JSONArray) json.get("items");
-			int size = 0;
-			if (null != items && items.size() > 0) {
-				size = items.size();
-				for (Object o: items) {
-					JSONObject item = (JSONObject)o;
-					Long id = (Long) item.get("id");
-					String kb = manageScans(ScanAction.GET_VULN_BY_ID, scanId, id);
-					System.out.println("Saving KB Detail: PK=<Autogenerated>, FK=" + idMaster + ", KB="+ id +", DATA=" + kb);
+			orderId = (Long) MongoUtil.getInstance().findById(scanId, "orderId");
+			log.debug("Saving Vulnerabilities for scanId=" + scanId );
+			JSONParser parser = new JSONParser();
+			JSONObject json;
+			try {
+				String kbALl = manageScanOrder(ScanAction.GET_VULN_ALL, orderId);
+				json = (JSONObject) parser.parse(kbALl);
+				JSONArray items = (JSONArray) json.get("items");
+				if (null != items && items.size() > 0) {
+					JSONArray details = new JSONArray();
+					for (Object o: items) {
+						JSONObject item = (JSONObject)o;
+						Long id = (Long) item.get("id");
+						String kb = manageScanOrder(ScanAction.GET_VULN_BY_ID, orderId, id);
+						details.add(parser.parse(kb));
+					}
+					MongoUtil.getInstance().updateVulners(scanId, details);
 				}
+			} catch (ParseException e) {
+				log.error("Error saving vulnerabilities. Check logs.", e);
 			}
-			System.out.println(size + " KBs saved in DB...");
-		} catch (ParseException e) {
-			System.err.println("Error saving KB results..." + e.getMessage());
+		} catch (Exception e1) {
+			log.error("Error getting orderId. Check logs.", e1);
 		}
 	}
 
 	public Long getScannerId() {
 		return Scanner.W3AF.getId();
+	}
+
+	public String getVulnerabilities(Long scanId) {
+		try {
+			Object o = MongoUtil.getInstance().findById(scanId, "vulnerabilities");
+			if (null != o) {
+				return o.toString();
+			}
+			return "None";
+		} catch (Exception e) {
+			log.error(e);
+			return "Error getting vulnerabilities. Check logs.";
+		}
 	}
 	
 	

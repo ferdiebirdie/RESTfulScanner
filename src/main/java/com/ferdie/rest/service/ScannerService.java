@@ -12,10 +12,10 @@ public interface ScannerService {
 	
 	String getScanStatus(Long id);
 	
-	//String getScanLogs(Long id);
-	
 	String getActiveScans();
 	
 	Long getScannerId();
+
+	String getVulnerabilities(Long scanId);
 	
 }

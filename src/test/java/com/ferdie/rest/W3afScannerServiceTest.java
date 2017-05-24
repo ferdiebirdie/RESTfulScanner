@@ -3,84 +3,88 @@ package com.ferdie.rest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.ferdie.rest.service.W3afScannerService;
 import com.ferdie.rest.service.domain.ScanOrder;
+import com.ferdie.rest.service.domain.Scanner;
 
 public class W3afScannerServiceTest {
-	
+	final static Logger log = Logger.getLogger(W3afScannerServiceTest.class);
 	W3afScannerService svc = new W3afScannerService();
-	Long scanId = 3L;
+	Long scanId = 17L;
+	Long orderId = 8L;
 	
 	@Test
 	public void startScan() {
-		System.out.println("Testing: startScan()....");
+		log.debug("Testing: startScan()....");
 		List<String> targetUrls = new ArrayList<String>();
 		targetUrls.add("http://www.webscantest.com/shutterform/");
-		//targetUrls.add("http://www.webscantest.com/datastore/search_by_id.php");
+		targetUrls.add("http://www.webscantest.com/datastore/search_by_id.php");
 		ScanOrder result = svc.scan(targetUrls);
-		System.out.println(result);
-	}
-	
-	@Test
-	public void deleteScan() {
-		System.out.println("Testing: deleteScan()....");
-		String result = svc.deleteScan(scanId);
-		System.out.println(result);
+		log.debug(result);
 	}
 	
 	@Test
 	public void getScanStatus() {
-		System.out.println("Testing: getScanStatus()....");
-		String result = svc.getScanStatus(scanId);
-		System.out.println(result);
+		log.debug("Testing: getScanStatus()....");
+		String result = svc.getScanStatus(orderId);
+		log.debug(result);
 	}
-	
-	/*@Test
-	public void getScanLogs() {
-		System.out.println("Testing: getScanLogs()....");
-		String result = svc.getScanLogs(scanId);
-		System.out.println(result);
-	}*/
 	
 	@Test
 	public void getActiveScans() {
-		System.out.println("Testing: getActiveScans()....");
+		log.debug("Testing: getActiveScans()....");
 		String result = svc.getActiveScans();
-		System.out.println(result);
+		log.debug(result);
 	}
 	
 	@Test
 	public void getCompletedScanIds() {
-		System.out.println("Testing: getCompletedScanIds()....");
+		log.debug("Testing: getCompletedScanIds()....");
 		List<Long> result = svc.getCompletedScanIds();
-		System.out.println(result);
+		log.debug(result);
 	}
 	
 	@Test
 	public void hasRunningScan() {
-		System.out.println("Testing: hasRunningScan()....");
+		log.debug("Testing: hasRunningScan()....");
 		boolean result = svc.hasRunningScan();
-		System.out.println(result);
+		log.debug(result);
 	}
-	
-	String id = "2";
 	
 	@Test
 	public void testSave() {
-		System.out.println("Testing: testSave()....");
-		final String result = "{\"href\": \"/scans/"+id+"\", \"id\": "+id+", \"message\": \"Success\" }";
+		log.debug("Testing: testSave()....");
+		final String result = "{\"href\": \"/scans/"+orderId+"\", \"id\": "+orderId+", \"message\": \"Success\" }";
 		ScanOrder scan = new ScanOrder(result);
+		scan.setScanId(scanId);
 		svc.save(scan);
 	}
 	
 	@Test
-	public void testSaveInDB() {
-		System.out.println("Testing: testSaveInDB()....");
-		final String result = "{\"href\": \"/scans/"+id+"\", \"id\": "+id+", \"message\": \"Success\" }";
-		ScanOrder scan = new ScanOrder(result);
-		svc.saveInDB(scan);
+	public void testSaveVulners() {
+		log.debug("Testing: testSaveInDB()....");
+		svc.saveVulners(scanId);
+	}
+	
+	@Test
+	public void testGetVulnerabilities() throws ParseException {
+		log.debug(svc.getVulnerabilities(scanId));
 	}
 
+	@Test
+	public void testRandom() {
+		ScanOrder order = new ScanOrder();
+		log.debug(order);
+		testFinal(order);
+		log.debug(order);
+	}
+	
+	private void testFinal(ScanOrder order) {
+		order.setScanId(999L);
+	}
+	
 }
