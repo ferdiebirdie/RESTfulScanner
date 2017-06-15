@@ -7,9 +7,9 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import com.ferdie.rest.mongo.MongoUtil;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
+import com.ferdie.rest.util.MongoDbUtil;
 import com.mongodb.BasicDBObject;
 
 public class ScannerServiceFacade {
@@ -33,20 +33,17 @@ public class ScannerServiceFacade {
 
 	public String getScanStatus(Long scanId) {
 		try {
-			BasicDBObject scan = (BasicDBObject) MongoUtil.getInstance().findById(scanId);
-//			log.debug("Scan: " + scan);
+			BasicDBObject scan = (BasicDBObject) MongoDbUtil.instance.findById(scanId);
 			String dbStatus = Objects.toString(scan.get("status"));
-//			log.debug("DB status: " + dbStatus);
 			
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(svc.getScanStatus(scan.getLong("orderId")));
 			String apiStatus = Objects.toString(json.get("status"));
-//			log.debug("API status: " + apiStatus);
 			
 			if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
 				// update DB
 				log.debug("Syncing API to DB status...");
-				return MongoUtil.getInstance().updateStatus(scanId, "Completed");
+				return MongoDbUtil.instance.updateStatus(scanId, "Completed");
 			}
 			return dbStatus;
 		} catch (Exception e) {

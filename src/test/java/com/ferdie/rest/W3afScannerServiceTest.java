@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.ferdie.rest.service.W3afScannerService;
 import com.ferdie.rest.service.domain.ScanOrder;
-import com.ferdie.rest.service.domain.Scanner;
 
 public class W3afScannerServiceTest {
 	final static Logger log = Logger.getLogger(W3afScannerServiceTest.class);

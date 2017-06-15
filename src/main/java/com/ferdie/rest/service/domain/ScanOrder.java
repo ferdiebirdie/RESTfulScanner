@@ -1,12 +1,13 @@
 package com.ferdie.rest.service.domain;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ScanOrder {
-
+	final static Logger log = Logger.getLogger(ScanOrder.class);
 	private Long orderId;
 	private Long scannerId;
 	private Long scanId;
@@ -29,7 +30,7 @@ public class ScanOrder {
 
 	@Override
 	public String toString() {
-		return "ScanOrder[orderId="+ orderId + ", scanId="+ scanId + ", scannerId="+ scannerId + ", message=" + message + ", status="+ status +", success="+isSuccess()+"]";
+		return "ScanOrder[orderId="+ orderId + ", scanId="+ scanId + ", scannerId="+ scannerId + ", message=" + message + ", status="+ status +"]";
 	}
 
 	public String getMessage() {
@@ -62,7 +63,7 @@ public class ScanOrder {
 				orderId = (Long) json.get("id");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
-				System.err.println(e.getMessage());
+				log.warn("", e);
 				message = result;
 			}
 		}

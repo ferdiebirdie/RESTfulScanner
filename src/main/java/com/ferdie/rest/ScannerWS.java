@@ -7,6 +7,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.service.ScannerServiceFacade;
 import com.ferdie.rest.service.domain.ScanOrder;
 
@@ -24,7 +26,13 @@ public class ScannerWS {
 	@Path("/scan")
 	public Response scan(@QueryParam("scannerId") Long scannerId, @QueryParam("urls") final List<String> targetUrls) {
 		ScanOrder result = svcFacade.scan(scannerId, targetUrls);
-		return Response.ok(result.getMessage()).build();
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			String jsonInString = mapper.writeValueAsString(result);
+			return Response.ok(jsonInString).build();
+		} catch (JsonProcessingException e) {
+			return Response.ok(result.toString()).build();
+		}
 	}
 	
 	

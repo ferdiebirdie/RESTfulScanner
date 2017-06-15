@@ -20,7 +20,7 @@ public class ScannerServiceFacadeTest {
 		List<String> targetUrls = new ArrayList<String>();
 		targetUrls.add("http://www.webscantest.com/shutterform/");
 //		targetUrls.add("http://www.webscantest.com/datastore/search_by_id.php");
-		log.debug(svcFacade.scan(Scanner.W3AF.getId(), targetUrls));
+		svcFacade.scan(Scanner.W3AF.getId(), targetUrls);
 	}
 	
 	@Test
