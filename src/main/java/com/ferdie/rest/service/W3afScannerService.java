@@ -201,17 +201,17 @@ public class W3afScannerService implements ScannerService, Constants {
 			
 			Runnable r = new Runnable() {
 		         public void run() {
-					final int waitingTime = 60;
+//					final int waitingTime = 60;
 					while(true) {
 						boolean running = hasRunningScan();
 						if (running) {
-							log.debug("W3AF scan still in progress, check again after "+ waitingTime +"sec...");
-							try {
-								Thread.sleep(waitingTime*1000);
-							} catch (InterruptedException e) {
-								log.error("Error while sleeping", e);
-								break;
-							}
+//							log.debug("W3AF scan still in progress, check again after "+ waitingTime +"sec...");
+//							try {
+//								Thread.sleep(waitingTime*1000);
+//							} catch (InterruptedException e) {
+//								log.error("Error while sleeping", e);
+//								break;
+//							}
 						} else {
 							saveVulners(scan.getScanId());
 							break;
