@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.json.simple.parser.ParseException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.ferdie.rest.service.W3afScannerService;
@@ -84,6 +85,13 @@ public class W3afScannerServiceTest {
 	
 	private void testFinal(ScanOrder order) {
 		order.setScanId(999L);
+	}
+	
+	@Test
+	public void testGetProfile() {
+		String p = W3afScannerService.getProfile();
+		log.debug(p);
+		Assert.assertFalse("".equals(p));
 	}
 	
 }

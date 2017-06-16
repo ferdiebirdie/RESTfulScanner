@@ -1,6 +1,8 @@
 package com.ferdie.rest.service;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -127,8 +129,11 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	public static String getProfile() {
 		try {
-			return new String(Files.readAllBytes(Paths.get("/home/ferdie/w3af/profiles/fast_scan_corrected.pw3af")));
+			URL resource = W3afScannerService.class.getResource("/profiles/w3af/fast_scan_corrected.pw3af");
+			return new String(Files.readAllBytes(Paths.get(resource.toURI())));
 		} catch (IOException e) {
+			log.error(e);
+		} catch (URISyntaxException e) {
 			log.error(e);
 		}
 		return "";
