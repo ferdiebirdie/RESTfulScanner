@@ -194,25 +194,25 @@ public class W3afScannerService implements ScannerService, Constants {
 			}
 			log.info("Acquired scanId=" + scan.getScanId());
 			// sleep 10sec to give enough time for w3af 
-//			try {
-//				Thread.sleep(5000);
-//			} catch (InterruptedException e) {
-//				log.error("Error: ", e);
-//			}
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				log.error("Error: ", e);
+			}
 			
 			Runnable r = new Runnable() {
 		         public void run() {
-//					final int waitingTime = 60;
+					final int waitingTime = 60;
 					while(true) {
 						boolean running = hasRunningScan();
 						if (running) {
-//							log.debug("W3AF scan still in progress, check again after "+ waitingTime +"sec...");
-//							try {
-//								Thread.sleep(waitingTime*1000);
-//							} catch (InterruptedException e) {
-//								log.error("Error while sleeping", e);
-//								break;
-//							}
+							log.debug("W3AF scan still in progress, check again after "+ waitingTime +"sec...");
+							try {
+								Thread.sleep(waitingTime*1000);
+							} catch (InterruptedException e) {
+								log.error("Error while sleeping", e);
+								break;
+							}
 						} else {
 							saveVulners(scan.getScanId());
 							break;
@@ -220,8 +220,8 @@ public class W3afScannerService implements ScannerService, Constants {
 					}
 		         }
 			};
-			log.debug("Saving vulnerabilities...");
 			new Thread(r).start();
+			log.debug("Started saving vulnerabilities...");
 
 		} catch (Exception e1) {
 			log.error(e1);
