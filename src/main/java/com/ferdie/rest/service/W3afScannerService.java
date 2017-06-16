@@ -192,12 +192,13 @@ public class W3afScannerService implements ScannerService, Constants {
 				Long scanId = MongoDbUtil.instance.createScan(scan.getScannerId(), scan.getOrderId());
 				scan.setScanId(scanId);
 			}
+			log.info("Acquired scanId=" + scan.getScanId());
 			// sleep 10sec to give enough time for w3af 
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				log.error("Error: ", e);
-			}
+//			try {
+//				Thread.sleep(5000);
+//			} catch (InterruptedException e) {
+//				log.error("Error: ", e);
+//			}
 			
 			Runnable r = new Runnable() {
 		         public void run() {
@@ -219,6 +220,7 @@ public class W3afScannerService implements ScannerService, Constants {
 					}
 		         }
 			};
+			log.debug("Saving vulnerabilities...");
 			new Thread(r).start();
 
 		} catch (Exception e1) {
