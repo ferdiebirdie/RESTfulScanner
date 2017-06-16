@@ -22,8 +22,8 @@ public enum PropertiesUtil implements Constants {
 			InputStream is = null;
 			
 			try {
-				//is = PropertiesUtil.class.getResourceAsStream("/config.properties");
-				is = new FileInputStream(CONFIG_FILE);
+				is = PropertiesUtil.class.getResourceAsStream("/config.properties");
+//				is = new FileInputStream(CONFIG_FILE);
 				props.load(is);
 			} catch (IOException e) {
 				log.error("", e);
