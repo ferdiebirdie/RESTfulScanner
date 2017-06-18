@@ -62,8 +62,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<!-- <outputDirectory>/opt/vscanner/war</outputDirectory> -->
-					<outputDirectory>/home/vscanner/dockerfiles/webapp</outputDirectory>
+					<outputDirectory>${user.home}/dockerfiles/webapp</outputDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
