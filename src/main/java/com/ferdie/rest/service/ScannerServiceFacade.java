@@ -41,11 +41,11 @@ public class ScannerServiceFacade {
 				JSONObject json = (JSONObject) parser.parse(svc.getScanStatus(scan.getLong("orderId")));
 				String apiStatus = Objects.toString(json.get("status"));
 				
-				if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
+				/*if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
 					// update DB
 					log.debug("Syncing API to DB status...");
 					return MongoDbUtil.instance.updateStatus(scanId, "Completed");
-				}
+				}*/ 
 				return dbStatus;	
 			} else {
 				return "Not available";
