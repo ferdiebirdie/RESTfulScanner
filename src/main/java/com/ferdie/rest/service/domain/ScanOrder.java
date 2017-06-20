@@ -14,11 +14,21 @@ public class ScanOrder {
 	private String message;
 	private String status;
 	private String result;
+	private boolean isCreated;
 	
 	public ScanOrder(Long scannerId, String result) {
 		this(result);
 		this.scannerId = scannerId;
 		this.status = "Running";
+		this.isCreated = true;
+	}
+	
+	public boolean isCreated() {
+		return isCreated;
+	}
+
+	public void setCreated(boolean isCreated) {
+		this.isCreated = isCreated;
 	}
 	
 	public ScanOrder(String result) {
@@ -49,10 +59,6 @@ public class ScanOrder {
 		this.status = status;
 	}
 	
-	public boolean isSuccess() {
-		return null != this.orderId;
-	}
-
 	public void parseJsonString(String result) {
 		this.result = result;
 		if (StringUtils.isNotEmpty(result)) {
@@ -63,7 +69,7 @@ public class ScanOrder {
 				orderId = (Long) json.get("id");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
-				log.warn("", e);
+				//log.warn("", e.getMessage());
 				message = result;
 			}
 		}

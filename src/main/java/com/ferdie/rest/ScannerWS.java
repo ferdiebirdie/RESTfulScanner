@@ -50,4 +50,12 @@ public class ScannerWS {
 		String result = svcFacade.getVulnerabilities(scanId);
 		return Response.ok(result).build();
 	}
+	
+	// /delete?id=123
+	@GET
+	@Path("/delete")
+	public Response deleteScan(@QueryParam("id") Long orderId) {
+		String result = svcFacade.deleteScan(orderId);
+		return Response.ok(result).build();
+	}
 }

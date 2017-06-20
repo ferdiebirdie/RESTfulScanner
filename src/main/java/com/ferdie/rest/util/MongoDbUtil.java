@@ -2,6 +2,7 @@ package com.ferdie.rest.util;
 
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 
 import com.ferdie.rest.service.domain.Constants;
@@ -16,6 +17,7 @@ public enum MongoDbUtil implements Constants {
 	instance;
 	
 	private MongoClient mongoClient;
+	final static Logger log = Logger.getLogger(MongoDbUtil.class);
 	
 	public Long getNextSequence() throws Exception {
 		DB db = getDB();
@@ -63,7 +65,7 @@ public enum MongoDbUtil implements Constants {
 			scan.update(searchQuery, newDocument);
 		    
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 	}
 	
@@ -82,17 +84,23 @@ public enum MongoDbUtil implements Constants {
 			scan.update(searchQuery, newDocument);
 		    return status;
 		} catch (Exception e) {
+			log.error(e);
 			throw e;
 		}
 	}
 	
-	public Object findById(Long scanId, String field) throws Exception {
+	public Object findById(Long scanId, String field) {
 		// search
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("_id", scanId);
-		Object o = findById(scanId);
-		if (null != o) {
-			return ((DBObject)o).get(field);
+		Object o;
+		try {
+			o = findById(scanId);
+			if (null != o) {
+				return ((DBObject)o).get(field);
+			}
+		} catch (Exception e) {
+			log.error(e);
 		}
 		return null;
 	}

@@ -19,7 +19,9 @@ public class ScannerServiceFacade {
 		switch (Scanner.toScanner(scannerId)) {
 			case W3AF:
 				scan = svc.scan(targetUrls);
-				//svc.save(scan);
+				if (scan.isCreated()) {
+					svc.save(scan);
+				}
 				log.debug(scan);
 				return scan;
 			// handle other scanners
@@ -57,6 +59,10 @@ public class ScannerServiceFacade {
 
 	public String getVulnerabilities(Long scanId) {
 		return svc.getVulnerabilities(scanId);
+	}
+	
+	public String deleteScan(Long orderId) {
+		return svc.deleteScan(orderId);
 	}
 
 }

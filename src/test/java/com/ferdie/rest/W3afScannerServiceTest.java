@@ -51,7 +51,7 @@ public class W3afScannerServiceTest {
 	@Test
 	public void hasRunningScan() {
 		log.debug("Testing: hasRunningScan()....");
-		boolean result = svc.hasRunningScan();
+		boolean result = svc.isScanRunning();
 		log.debug(result);
 	}
 	
@@ -67,7 +67,11 @@ public class W3afScannerServiceTest {
 	@Test
 	public void testSaveVulners() {
 		log.debug("Testing: testSaveInDB()....");
-		svc.saveVulners(scanId);
+		try {
+			svc.saveVulners(scanId);
+		} catch (ParseException e) {
+			Assert.assertTrue(false);
+		}
 	}
 	
 	@Test

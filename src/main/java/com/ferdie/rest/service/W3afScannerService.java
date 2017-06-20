@@ -35,23 +35,12 @@ import com.ferdie.rest.util.PropertiesUtil;
 
 public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
-	// private static String WS_URL = "http://127.0.0.1:5000"; // TODO: get from
-	// properties file
 
 	public ScanOrder scan(List<String> targetUrls) {
-		if (hasRunningScan()) {
+		if (isScanActive()) {
 			return new ScanOrder("Previous scan still running. Try again later.");
 		}
-		List<Long> ids = getCompletedScanIds();
-		if (null != ids && ids.size() > 0) {
-			log.debug("Deleting completed scans...");
-
-			for (Long id : ids) {
-				deleteScan(id);
-			}
-			log.debug("Deleted Ids: " + ids);
-		}
-		log.debug("--- Scan Started ---");
+		log.debug("------------------ Scan Started ------------------");
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
 		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + "/scans/");
 
@@ -188,66 +177,76 @@ public class W3afScannerService implements ScannerService, Constants {
 		}
 		return ids;
 	}
-
-	public boolean hasRunningScan() {
+	
+	private JSONObject getActiveScan() {
 		JSONParser parser = new JSONParser();
 		try {
 			JSONObject json = (JSONObject) parser.parse(getActiveScans());
 			JSONArray items = (JSONArray) json.get("items");
 			if (null != items && items.size() > 0) {
 				for (Object obj : items) {
-					JSONObject item = (JSONObject) obj;
-					if ("Running".equals(item.get("status"))) {
-						return true;
-					}
+					// current w3af version only allow 1 scan at a time
+					return (JSONObject) obj;
 				}
 			}
 		} catch (ParseException e) {
 			log.error("Parsing error: ", e);
-			return false;
 		}
-		return false;
+		return null;
+	}
+
+	public boolean isScanActive() {
+		return null != getActiveScan();
+	}
+	
+	public boolean isScanRunning() {
+		JSONObject scan = getActiveScan();
+		return null != scan && "Running".equals(scan.get("status"));
 	}
 
 	public void save(final ScanOrder scan) {
-		if (!scan.isSuccess()) {
-			return;
-		}
 		try {
-			if (null == scan.getScanId()) {
-				Long scanId = MongoDbUtil.instance.createScan(scan.getScannerId(), scan.getOrderId());
-				scan.setScanId(scanId);
-			}
+			Long scanId = MongoDbUtil.instance.createScan(scan.getScannerId(), scan.getOrderId());
+			scan.setScanId(scanId);
+			
 			log.info("Acquired scanId=" + scan.getScanId());
-			// sleep 10sec to give enough time for w3af
+			// give enough time for w3af to process first
 			try {
+				log.debug("Giving w3af enough time to process (5sec)....");
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
 			}
-
-			Runnable r = new Runnable() {
-				public void run() {
-					final int waitingTime = 60;
-					while (true) {
-						boolean running = hasRunningScan();
-						if (running) {
-							log.debug("W3AF scan still in progress, check again after " + waitingTime + "sec...");
-							try {
-								Thread.sleep(waitingTime * 1000);
-							} catch (InterruptedException e) {
-								log.error("Error while sleeping", e);
+			if (isScanActive()) {
+				log.debug("Started saving vulnerabilities...");
+				Runnable r = new Runnable() {
+					public void run() {
+						final int waitingTime = 60;
+						while (true) {
+							boolean running = isScanRunning();
+							if (running) {
+								log.debug("W3AF scan still in progress, check again after " + waitingTime + "sec...");
+								try {
+									Thread.sleep(waitingTime * 1000);
+								} catch (InterruptedException e) {
+									log.error("Error while sleeping", e);
+									break;
+								}
+							} else {
+								try {
+									saveVulners(scan.getScanId());
+									// temporary
+									deleteScan(scan.getOrderId());
+								} catch (ParseException e) {
+									log.error("Skipping scan delete", e);
+								}
 								break;
 							}
-						} else {
-							saveVulners(scan.getScanId());
-							break;
 						}
 					}
-				}
-			};
-			new Thread(r).start();
-			log.debug("Started saving vulnerabilities...");
+				};
+				new Thread(r).start();
+			}
 
 		} catch (Exception e1) {
 			log.error(e1);
@@ -255,10 +254,11 @@ public class W3afScannerService implements ScannerService, Constants {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void saveVulners(Long scanId) {
-		Long orderId;
-		try {
-			orderId = (Long) MongoDbUtil.instance.findById(scanId, "orderId");
+	public void saveVulners(Long scanId) throws ParseException {
+		Long orderId = (Long) MongoDbUtil.instance.findById(scanId, "orderId");
+		if (null == orderId) {
+			log.warn("Vulnerabilities not saved! ScanId=" + scanId + " not found in database." );
+		} else {
 			log.debug("Saving vulnerabilities for scanId=" + scanId);
 			JSONParser parser = new JSONParser();
 			JSONObject json;
@@ -279,9 +279,8 @@ public class W3afScannerService implements ScannerService, Constants {
 				}
 			} catch (ParseException e) {
 				log.error("Error saving vulnerabilities. Check logs.", e);
+				throw e;
 			}
-		} catch (Exception e1) {
-			log.error("Error getting orderId. Check logs.", e1);
 		}
 	}
 
