@@ -19,7 +19,7 @@ public class ScannerServiceFacade {
 		switch (Scanner.toScanner(scannerId)) {
 			case W3AF:
 				scan = svc.scan(targetUrls);
-				svc.save(scan);
+				//svc.save(scan);
 				log.debug(scan);
 				return scan;
 			// handle other scanners
