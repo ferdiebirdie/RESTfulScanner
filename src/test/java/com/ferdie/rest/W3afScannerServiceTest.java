@@ -89,7 +89,7 @@ public class W3afScannerServiceTest {
 	
 	@Test
 	public void testGetProfile() {
-		String p = W3afScannerService.getProfile();
+		String p = svc.getProfile();
 		log.debug(p);
 		Assert.assertFalse("".equals(p));
 	}

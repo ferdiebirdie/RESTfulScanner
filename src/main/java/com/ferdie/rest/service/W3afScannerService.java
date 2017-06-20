@@ -127,12 +127,12 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	}
 
-	public static String getProfile() {
+	public String getProfile() {
 		InputStream in = null;
 		InputStreamReader fr = null;
 		BufferedReader br = null;
 		try {
-			in = W3afScannerService.class.getResourceAsStream("/profiles/w3af/fast_scan_corrected.pw3af");
+			in = getClass().getResourceAsStream("/profiles/w3af/fast_scan_corrected.pw3af");
 			fr = new InputStreamReader(in);
 			br = new BufferedReader(fr);
 			StringBuilder sb = new StringBuilder();
