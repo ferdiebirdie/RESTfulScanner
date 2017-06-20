@@ -1,6 +1,5 @@
 package com.ferdie.rest.util;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -23,7 +22,6 @@ public enum PropertiesUtil implements Constants {
 			
 			try {
 				is = PropertiesUtil.class.getResourceAsStream("/config.properties");
-//				is = new FileInputStream(CONFIG_FILE);
 				props.load(is);
 			} catch (IOException e) {
 				log.error("", e);

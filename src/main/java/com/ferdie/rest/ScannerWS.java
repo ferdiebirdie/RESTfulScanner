@@ -35,7 +35,6 @@ public class ScannerWS {
 		}
 	}
 	
-	
 	// /status?scanId=123
 	@GET
 	@Path("/status")

@@ -1,10 +1,9 @@
 package com.ferdie.rest.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,8 +35,9 @@ import com.ferdie.rest.util.PropertiesUtil;
 
 public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
-//	private static String WS_URL = "http://127.0.0.1:5000"; // TODO: get from properties file
-	
+	// private static String WS_URL = "http://127.0.0.1:5000"; // TODO: get from
+	// properties file
+
 	public ScanOrder scan(List<String> targetUrls) {
 		if (hasRunningScan()) {
 			return new ScanOrder("Previous scan still running. Try again later.");
@@ -45,31 +45,31 @@ public class W3afScannerService implements ScannerService, Constants {
 		List<Long> ids = getCompletedScanIds();
 		if (null != ids && ids.size() > 0) {
 			log.debug("Deleting completed scans...");
-			
+
 			for (Long id : ids) {
 				deleteScan(id);
 			}
 			log.debug("Deleted Ids: " + ids);
 		}
 		log.debug("--- Scan Started ---");
-		Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
+		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
 		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + "/scans/");
-		 
+
 		Map<String, Object> json = new LinkedHashMap<String, Object>();
 		json.put("scan_profile", getProfile());
 		json.put("target_urls", targetUrls);
-		
+
 		String input = JSONValue.toJSONString(json);
-		 
-		Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_JSON);
+
+		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.post(Entity.entity(input, MediaType.APPLICATION_JSON));
-		 
+
 		String result = response.readEntity(String.class);
 		ScanOrder scan = new ScanOrder(getScannerId(), result);
 		return scan;
-		
+
 	}
-	
+
 	public String deleteScan(Long id) {
 		return manageScanOrder(ScanAction.DELETE, id);
 	}
@@ -85,60 +85,86 @@ public class W3afScannerService implements ScannerService, Constants {
 	private String manageScanOrder(ScanAction action, Long orderId) {
 		return manageScanOrder(action, orderId, null);
 	}
-	
+
 	private String manageScanOrder(ScanAction action, Long orderId, Long detailId) {
 		String reqUrl = "/scans/";
 		switch (action) {
-			case GET_STATUS:
-				reqUrl = reqUrl + orderId + "/status";
-				break;
-			case GET_LOGS:
-				reqUrl = reqUrl + orderId + "/log";
-				break;
-			case GET_VULN_ALL:
-				reqUrl = reqUrl + orderId + "/kb/";
-				break;
-			case GET_VULN_BY_ID:
-				reqUrl = reqUrl + orderId + "/kb/" + detailId;
-				break;
-				
-			case DELETE:
-				reqUrl = reqUrl + orderId;
-				
-				Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
-				WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + reqUrl);
-				 
-				Invocation.Builder invocationBuilder =  webTarget.request();
-				Response response = invocationBuilder.delete();
-				 
-				return response.readEntity(String.class);
-			case GET_ACTIVE_SCANS:
-				break;
-			default:
-				break;
+		case GET_STATUS:
+			reqUrl = reqUrl + orderId + "/status";
+			break;
+		case GET_LOGS:
+			reqUrl = reqUrl + orderId + "/log";
+			break;
+		case GET_VULN_ALL:
+			reqUrl = reqUrl + orderId + "/kb/";
+			break;
+		case GET_VULN_BY_ID:
+			reqUrl = reqUrl + orderId + "/kb/" + detailId;
+			break;
+
+		case DELETE:
+			reqUrl = reqUrl + orderId;
+
+			Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
+			WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + reqUrl);
+
+			Invocation.Builder invocationBuilder = webTarget.request();
+			Response response = invocationBuilder.delete();
+
+			return response.readEntity(String.class);
+		case GET_ACTIVE_SCANS:
+			break;
+		default:
+			break;
 		}
-		Client client = ClientBuilder.newClient( new ClientConfig().register( LoggingFeature.class ) );
+		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
 		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + reqUrl);
-		 
-		Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_JSON);
+
+		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
-		 
+
 		return response.readEntity(String.class);
-			     
+
 	}
 
 	public static String getProfile() {
+		InputStream in = null;
+		InputStreamReader fr = null;
+		BufferedReader br = null;
 		try {
-			URL resource = W3afScannerService.class.getResource("/profiles/w3af/fast_scan_corrected.pw3af");
-			return new String(Files.readAllBytes(Paths.get(resource.toURI())));
+			in = W3afScannerService.class.getResourceAsStream("/profiles/w3af/fast_scan_corrected.pw3af");
+			fr = new InputStreamReader(in);
+			br = new BufferedReader(fr);
+			StringBuilder sb = new StringBuilder();
+			String line = "";
+			while (null != (line = br.readLine())) {
+				if (sb.length() > 0) {
+					sb.append(System.lineSeparator());
+				}
+				sb.append(line);
+			}
+			return sb.toString();
 		} catch (IOException e) {
 			log.error(e);
-		} catch (URISyntaxException e) {
-			log.error(e);
+		} finally {
+			if (null != br) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					log.error(e);
+				}
+			}
+			if (null != fr) {
+				try {
+					fr.close();
+				} catch (IOException e) {
+					log.error(e);
+				}
+			}
 		}
 		return "";
 	}
-	
+
 	public List<Long> getCompletedScanIds() {
 		List<Long> ids = new ArrayList<Long>(1);
 		JSONParser parser = new JSONParser();
@@ -162,7 +188,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		}
 		return ids;
 	}
-	
+
 	public boolean hasRunningScan() {
 		JSONParser parser = new JSONParser();
 		try {
@@ -193,22 +219,22 @@ public class W3afScannerService implements ScannerService, Constants {
 				scan.setScanId(scanId);
 			}
 			log.info("Acquired scanId=" + scan.getScanId());
-			// sleep 10sec to give enough time for w3af 
+			// sleep 10sec to give enough time for w3af
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
 			}
-			
+
 			Runnable r = new Runnable() {
-		         public void run() {
+				public void run() {
 					final int waitingTime = 60;
-					while(true) {
+					while (true) {
 						boolean running = hasRunningScan();
 						if (running) {
-							log.debug("W3AF scan still in progress, check again after "+ waitingTime +"sec...");
+							log.debug("W3AF scan still in progress, check again after " + waitingTime + "sec...");
 							try {
-								Thread.sleep(waitingTime*1000);
+								Thread.sleep(waitingTime * 1000);
 							} catch (InterruptedException e) {
 								log.error("Error while sleeping", e);
 								break;
@@ -218,7 +244,7 @@ public class W3afScannerService implements ScannerService, Constants {
 							break;
 						}
 					}
-		         }
+				}
 			};
 			new Thread(r).start();
 			log.debug("Started saving vulnerabilities...");
@@ -227,13 +253,13 @@ public class W3afScannerService implements ScannerService, Constants {
 			log.error(e1);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void saveVulners(Long scanId) {
 		Long orderId;
 		try {
 			orderId = (Long) MongoDbUtil.instance.findById(scanId, "orderId");
-			log.debug("Saving vulnerabilities for scanId=" + scanId );
+			log.debug("Saving vulnerabilities for scanId=" + scanId);
 			JSONParser parser = new JSONParser();
 			JSONObject json;
 			try {
@@ -242,14 +268,14 @@ public class W3afScannerService implements ScannerService, Constants {
 				JSONArray items = (JSONArray) json.get("items");
 				if (null != items && items.size() > 0) {
 					JSONArray details = new JSONArray();
-					for (Object o: items) {
-						JSONObject item = (JSONObject)o;
+					for (Object o : items) {
+						JSONObject item = (JSONObject) o;
 						Long id = (Long) item.get("id");
 						String kb = manageScanOrder(ScanAction.GET_VULN_BY_ID, orderId, id);
 						details.add(parser.parse(kb));
 					}
 					MongoDbUtil.instance.updateVulners(scanId, details);
-					log.debug("Done. Found "+ items.size() +" vulnerabilities.");
+					log.debug("Done. Found " + items.size() + " vulnerabilities.");
 				}
 			} catch (ParseException e) {
 				log.error("Error saving vulnerabilities. Check logs.", e);
@@ -275,6 +301,5 @@ public class W3afScannerService implements ScannerService, Constants {
 			return "Error getting vulnerabilities. Check logs.";
 		}
 	}
-	
-	
+
 }

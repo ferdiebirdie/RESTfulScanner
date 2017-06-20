@@ -11,8 +11,4 @@ public interface Constants {
 	// MONGO DB
 	String SCANNER_DB = "ScannerDB";
 	String KEY_DB_URI = "db.uri";
-	
-	// config file
-	String CONFIG_FILE = "/etc/opt/vscanner/config.properties";
-	
 }

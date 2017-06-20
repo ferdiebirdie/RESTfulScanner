@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
@@ -36,12 +34,12 @@ public class ScannerServiceFacade {
 			BasicDBObject scan = (BasicDBObject) MongoDbUtil.instance.findById(scanId);
 			if (null != scan) {
 				String dbStatus = Objects.toString(scan.get("status"));
-				
+				/*
 				JSONParser parser = new JSONParser();
 				JSONObject json = (JSONObject) parser.parse(svc.getScanStatus(scan.getLong("orderId")));
 				String apiStatus = Objects.toString(json.get("status"));
 				
-				/*if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
+				if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
 					// update DB
 					log.debug("Syncing API to DB status...");
 					return MongoDbUtil.instance.updateStatus(scanId, "Completed");
