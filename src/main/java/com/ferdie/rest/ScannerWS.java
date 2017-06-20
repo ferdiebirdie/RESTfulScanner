@@ -7,6 +7,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.service.ScannerServiceFacade;
@@ -18,7 +20,7 @@ import com.ferdie.rest.service.domain.ScanOrder;
  */
 @Path("/scanner")
 public class ScannerWS {
-
+	final static Logger log = Logger.getLogger(ScannerWS.class);
 	ScannerServiceFacade svcFacade = new ScannerServiceFacade();
 	
 	// /scan?scannerId=1
@@ -53,8 +55,9 @@ public class ScannerWS {
 	
 	// /delete?id=123
 	@GET
-	@Path("/delete")
+	@Path("/del")
 	public Response deleteScan(@QueryParam("id") Long orderId) {
+		log.debug("Deleting scan order id=" + orderId);
 		String result = svcFacade.deleteScan(orderId);
 		return Response.ok(result).build();
 	}
