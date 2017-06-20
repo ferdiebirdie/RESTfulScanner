@@ -59,6 +59,6 @@ public class ScannerWS {
 	public Response deleteScan(@QueryParam("id") Long orderId) {
 		log.debug("Deleting scan order id=" + orderId);
 		String result = svcFacade.deleteScan(orderId);
-		return Response.ok(result).build();
+		return Response.ok(result).build(); 
 	}
 }
