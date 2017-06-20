@@ -20,9 +20,6 @@
 		</profile>
 		<profile>
 			<id>test</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<wsUrlW3af>http://128.199.201.92:5000</wsUrlW3af>
 				<dbUri>mongodb://scan:scan@128.199.201.92:27017</dbUri>
@@ -30,9 +27,6 @@
 		</profile>
 		<profile>
 			<id>prod</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<wsUrlW3af>http://127.0.0.1:5000</wsUrlW3af>
 				<dbUri>mongodb://scan:scan@127.0.0.1:27017</dbUri>

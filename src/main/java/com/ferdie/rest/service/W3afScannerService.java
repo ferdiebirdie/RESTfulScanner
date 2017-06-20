@@ -35,8 +35,6 @@ import com.ferdie.rest.util.PropertiesUtil;
 
 public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
-	// private static String WS_URL = "http://127.0.0.1:5000"; // TODO: get from
-	// properties file
 
 	public ScanOrder scan(List<String> targetUrls) {
 		if (hasRunningScan()) {
