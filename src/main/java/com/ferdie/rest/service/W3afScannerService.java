@@ -41,6 +41,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		if (null != active) {
 			scan = new ScanOrder("Previous scan still running. Try again later.");
 			scan.setOrderId((Long) active.get("id"));
+			return scan;
 		}
 		log.debug("------------------ Scan Started ------------------");
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));

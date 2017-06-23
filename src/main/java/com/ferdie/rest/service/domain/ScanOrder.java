@@ -67,6 +67,7 @@ public class ScanOrder {
 			try {
 				json = (JSONObject) parser.parse(result);
 				orderId = (Long) json.get("id");
+				scanId = (Long) json.get("scanId");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
 				message = result;
