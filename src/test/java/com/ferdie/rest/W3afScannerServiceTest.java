@@ -42,13 +42,6 @@ public class W3afScannerServiceTest {
 	}
 	
 	@Test
-	public void getCompletedScanIds() {
-		log.debug("Testing: getCompletedScanIds()....");
-		List<Long> result = svc.getCompletedScanIds();
-		log.debug(result);
-	}
-	
-	@Test
 	public void hasRunningScan() {
 		log.debug("Testing: hasRunningScan()....");
 		boolean result = svc.isScanRunning();

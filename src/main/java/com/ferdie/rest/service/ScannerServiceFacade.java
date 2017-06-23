@@ -30,23 +30,13 @@ public class ScannerServiceFacade {
 		}
 		
 	}
-
+	
 	public String getScanStatus(Long scanId) {
 		try {
 			BasicDBObject scan = (BasicDBObject) MongoDbUtil.instance.findById(scanId);
 			if (null != scan) {
-				String dbStatus = Objects.toString(scan.get("status"));
-				/*
-				JSONParser parser = new JSONParser();
-				JSONObject json = (JSONObject) parser.parse(svc.getScanStatus(scan.getLong("orderId")));
-				String apiStatus = Objects.toString(json.get("status"));
-				
-				if (dbStatus.equals("Running") && apiStatus.equals("Stopped")) {
-					// update DB
-					log.debug("Syncing API to DB status...");
-					return MongoDbUtil.instance.updateStatus(scanId, "Completed");
-				}*/ 
-				return dbStatus;	
+//				return Objects.toString(scan.get("status"));
+				return Objects.toString(scan);
 			} else {
 				return "Not available";
 			}
@@ -54,6 +44,15 @@ public class ScannerServiceFacade {
 		} catch (Exception e) {
 			log.error(e);
 			return "Error on search! Check logs.";
+		}
+	}
+
+	public BasicDBObject getScanStatusJson(Long scanId) {
+		try {
+			return (BasicDBObject) MongoDbUtil.instance.findById(scanId);
+		} catch (Exception e) {
+			log.error(e);
+			return null;
 		}
 	}
 

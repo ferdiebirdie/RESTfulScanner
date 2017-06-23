@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +36,11 @@ public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
 
 	public ScanOrder scan(List<String> targetUrls) {
-		if (isScanActive()) {
-			return new ScanOrder("Previous scan still running. Try again later.");
+		ScanOrder scan = null;
+		JSONObject active = getActiveScan();
+		if (null != active) {
+			scan = new ScanOrder("Previous scan still running. Try again later.");
+			scan.setOrderId((Long) active.get("id"));
 		}
 		log.debug("------------------ Scan Started ------------------");
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
@@ -54,7 +56,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		Response response = invocationBuilder.post(Entity.entity(input, MediaType.APPLICATION_JSON));
 
 		String result = response.readEntity(String.class);
-		ScanOrder scan = new ScanOrder(getScannerId(), result);
+		scan = new ScanOrder(getScannerId(), result);
 		return scan;
 
 	}
@@ -154,30 +156,6 @@ public class W3afScannerService implements ScannerService, Constants {
 		return "";
 	}
 
-	public List<Long> getCompletedScanIds() {
-		List<Long> ids = new ArrayList<Long>(1);
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject json = (JSONObject) parser.parse(getActiveScans());
-			JSONArray items = (JSONArray) json.get("items");
-			if (null != items && items.size() > 0) {
-				for (Object obj : items) {
-					JSONObject item = (JSONObject) obj;
-					Long id = (Long) item.get("id");
-					String status = (String) item.get("status");
-					if ("Stopped".equalsIgnoreCase(status)) {
-						ids.add(id);
-					} else {
-						log.debug("Skipped: [Id=" + id + ", Status=" + status + "]");
-					}
-				}
-			}
-		} catch (ParseException e) {
-			log.error(e);
-		}
-		return ids;
-	}
-	
 	private JSONObject getActiveScan() {
 		JSONParser parser = new JSONParser();
 		try {
@@ -225,7 +203,8 @@ public class W3afScannerService implements ScannerService, Constants {
 						while (true) {
 							boolean running = isScanRunning();
 							if (running) {
-								log.debug("W3AF scan still in progress, check again after " + waitingTime + "sec...");
+								// add max time, if reached, exit with error message
+								log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
 								try {
 									Thread.sleep(waitingTime * 1000);
 								} catch (InterruptedException e) {
@@ -259,7 +238,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		if (null == orderId) {
 			log.warn("Vulnerabilities not saved! ScanId=" + scanId + " not found in database." );
 		} else {
-			log.debug("Saving vulnerabilities for scanId=" + scanId);
+			log.debug("Saving vulnerabilities...");
 			JSONParser parser = new JSONParser();
 			JSONObject json;
 			try {
@@ -275,7 +254,9 @@ public class W3afScannerService implements ScannerService, Constants {
 						details.add(parser.parse(kb));
 					}
 					MongoDbUtil.instance.updateVulners(scanId, details);
-					log.debug("Done. Found " + items.size() + " vulnerabilities.");
+					log.debug("Saved " + items.size() + " vulnerabilities.");
+				} else {
+					log.debug("No vulnerabilities found.");
 				}
 			} catch (ParseException e) {
 				log.error("Error saving vulnerabilities. Check logs.", e);

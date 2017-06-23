@@ -10,7 +10,7 @@ public class App {
 
 	public static void main(String[] args) {
 		ResourceConfig config = new ResourceConfig();
-		config.packages("com.ferdie.rest");
+		config.packages("com.ferdie.rest", "com.jersey.jaxb", "com.fasterxml.jackson.jaxrs.json");
 		ServletHolder servlet = new ServletHolder(new ServletContainer(config));
 
 		Server server = new Server(8080);

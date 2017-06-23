@@ -32,7 +32,7 @@ public class ScanOrder {
 	}
 	
 	public ScanOrder(String result) {
-		parseJsonString(result);
+		parseJson(result);
 	}
 
 	public ScanOrder() {
@@ -59,8 +59,8 @@ public class ScanOrder {
 		this.status = status;
 	}
 	
-	public void parseJsonString(String result) {
-		this.result = result;
+	public void parseJson(String result) {
+		//this.result = result;
 		if (StringUtils.isNotEmpty(result)) {
 			JSONParser parser = new JSONParser();
 			JSONObject json;
@@ -69,7 +69,6 @@ public class ScanOrder {
 				orderId = (Long) json.get("id");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
-				//log.warn("", e.getMessage());
 				message = result;
 			}
 		}

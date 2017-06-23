@@ -35,11 +35,6 @@
 	</profiles>
 	<dependencies>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.6.3</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.0</version>
@@ -76,6 +71,11 @@
 			<version>2.25.1</version>
 		</dependency>
 		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
@@ -100,6 +100,11 @@
 			<artifactId>jersey-container-jetty-http</artifactId>
 			<version>2.25.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>2.2.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>RESTfulScanner</finalName>
@@ -119,13 +124,9 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<outputDirectory>${user.home}/dockerfiles/webapp</outputDirectory>
-				</configuration>
-			</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-war-plugin</artifactId> 
+				<configuration> <outputDirectory>${user.home}/dockerfiles/webapp</outputDirectory> 
+				</configuration> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
