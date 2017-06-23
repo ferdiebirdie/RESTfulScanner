@@ -30,14 +30,14 @@ public class ScannerWS {
 	@GET
 	@Path("/scan")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response scan(@QueryParam("scannerId") Long scannerId, @QueryParam("urls") final List<String> targetUrls) {
+	public String scan(@QueryParam("scannerId") Long scannerId, @QueryParam("urls") final List<String> targetUrls) {
 		ScanOrder result = svcFacade.scan(scannerId, targetUrls);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			String jsonInString = mapper.writeValueAsString(result);
-			return Response.ok(jsonInString).build();
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
 		} catch (JsonProcessingException e) {
-			return Response.ok(result.toString()).build();
+			log.error(e);
+			return "Error";
 		}
 	}
 	
@@ -55,9 +55,8 @@ public class ScannerWS {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (Exception e) {
 			log.error(e);
+			return "Error";
 		}
-		return "";
-
 	}
 	
 	// /vulner?scanId=123
@@ -73,8 +72,8 @@ public class ScannerWS {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (Exception e) {
 			log.error(e);
+			return "Error";
 		}
-		return "";
 	}
 	
 	// /delete?id=123
