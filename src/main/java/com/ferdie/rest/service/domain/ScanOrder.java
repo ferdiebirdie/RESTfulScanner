@@ -8,9 +8,9 @@ import org.json.simple.parser.ParseException;
 
 public class ScanOrder {
 	final static Logger log = Logger.getLogger(ScanOrder.class);
+	private Long scanId;
 	private Long orderId;
 	private Long scannerId;
-	private Long scanId;
 	private String message;
 	private String status;
 	private String result;
@@ -67,7 +67,7 @@ public class ScanOrder {
 			try {
 				json = (JSONObject) parser.parse(result);
 				orderId = (Long) json.get("id");
-				scanId = (Long) json.get("scanId");
+				status = (String) json.get("status");
 				message = (String) json.get("message");
 			} catch (ParseException e) {
 				message = result;

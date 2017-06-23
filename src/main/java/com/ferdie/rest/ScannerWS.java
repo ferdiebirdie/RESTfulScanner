@@ -80,9 +80,9 @@ public class ScannerWS {
 	@GET
 	@Path("/delete")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteScan(@QueryParam("id") Long orderId) {
-		log.debug("Deleting scan order id=" + orderId + "...");
-		String result = svcFacade.deleteScan(orderId);
+	public Response deleteScan() {
+		log.debug("Deleting active scan order...");
+		String result = svcFacade.deleteScan();
 		return Response.ok(result).build(); 
 	}
 }

@@ -39,7 +39,8 @@ public class W3afScannerService implements ScannerService, Constants {
 		ScanOrder scan = null;
 		JSONObject active = getActiveScan();
 		if (null != active) {
-			scan = new ScanOrder("Previous scan still running. Try again later.");
+			scan = new ScanOrder(active.toJSONString());
+			scan.setMessage("Previous scan still running. Try again later.");
 			scan.setOrderId((Long) active.get("id"));
 			return scan;
 		}
@@ -62,7 +63,9 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	}
 
-	public String deleteScan(Long id) {
+	public String deleteActiveScan() {
+		JSONObject json = getActiveScan();
+		Long id = (Long) json.get("id");
 		return manageScanOrder(ScanAction.DELETE, id);
 	}
 
@@ -216,7 +219,7 @@ public class W3afScannerService implements ScannerService, Constants {
 								try {
 									saveVulners(scan.getScanId());
 									// temporary
-									deleteScan(scan.getOrderId());
+									deleteActiveScan();
 								} catch (ParseException e) {
 									log.error("Skipping scan delete", e);
 								}

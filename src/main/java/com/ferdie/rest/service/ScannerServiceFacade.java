@@ -60,8 +60,8 @@ public class ScannerServiceFacade {
 		return svc.getVulnerabilities(scanId);
 	}
 	
-	public String deleteScan(Long orderId) {
-		return svc.deleteScan(orderId);
+	public String deleteScan() {
+		return svc.deleteActiveScan();
 	}
 
 }
