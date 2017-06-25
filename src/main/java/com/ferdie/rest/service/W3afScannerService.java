@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -31,6 +32,7 @@ import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
 import com.ferdie.rest.util.MongoDbUtil;
 import com.ferdie.rest.util.PropertiesUtil;
+import com.mongodb.BasicDBObject;
 
 public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
@@ -69,8 +71,23 @@ public class W3afScannerService implements ScannerService, Constants {
 		return manageScanOrder(ScanAction.DELETE, id);
 	}
 
-	public String getScanStatus(Long orderId) {
-		return manageScanOrder(ScanAction.GET_STATUS, orderId);
+//	public String getScanStatus(Long orderId) {
+//		return manageScanOrder(ScanAction.GET_STATUS, orderId);
+//	}
+	
+	public String getScanStatus(Long scanId) {
+		try {
+			BasicDBObject scan = (BasicDBObject) MongoDbUtil.instance.findById(scanId);
+			if (null != scan) {
+				return Objects.toString(scan);
+			} else {
+				return "{\"message\": \"Not found\"}";
+			}
+			
+		} catch (Exception e) {
+			log.error(e);
+			return "Error on search! Check logs.";
+		}
 	}
 
 	public String getActiveScans() {
@@ -279,7 +296,7 @@ public class W3afScannerService implements ScannerService, Constants {
 			if (null != o) {
 				return o.toString();
 			}
-			return "None";
+			return "{\"message\": \"Not found\"}";
 		} catch (Exception e) {
 			log.error(e);
 			return "Error getting vulnerabilities. Check logs.";
