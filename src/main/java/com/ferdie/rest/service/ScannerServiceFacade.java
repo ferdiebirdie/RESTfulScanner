@@ -38,9 +38,10 @@ public class ScannerServiceFacade implements Constants {
 			producer.sendMessage(msg);
 			log.debug("Message sent: " + msg);
 			
-			String s = "{\"message\": \"Request now in queue.\", \"scanId\": " + scanId + "}";
-			String response =  JsonUtil.instance.getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(s);
-			return response;
+			ObjectMapper mapper = JsonUtil.instance.getObjectMapper();
+			String s = "{\"scanId\": " + scanId + ", \"message\": \"Request now in queue.\"}";
+			Object json = mapper.readValue(s, Object.class);
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (IOException | TimeoutException e1) {
 			log.error(e1);
 			return MSG_ERR_LOGS;
@@ -76,9 +77,7 @@ public class ScannerServiceFacade implements Constants {
 		try {
 			json = mapper.readValue(result, JSONObject.class);
 			json.remove("vulnerabilities");
-			String response =  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-			log.debug(response);
-			return response;
+			return  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (Exception e) {
 			log.error(e);
 			return MSG_ERR_LOGS;
@@ -91,9 +90,7 @@ public class ScannerServiceFacade implements Constants {
 		Object json;
 		try {
 			json = mapper.readValue(result, Object.class);
-			String response =  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-			log.debug(response);
-			return response;
+			return  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (Exception e) {
 			log.error(e);
 			return MSG_ERR_LOGS;
