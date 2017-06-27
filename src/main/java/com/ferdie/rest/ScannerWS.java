@@ -21,7 +21,7 @@ public class ScannerWS implements Constants {
 	final static Logger log = Logger.getLogger(ScannerWS.class);
 	ScannerServiceFacade svcFacade = new ScannerServiceFacade();
 	
-	// /scan?scannerId=1
+	// /scan?scannerId=1&url=
 	@GET
 	@Path("/scan")
 	@Produces(MediaType.APPLICATION_JSON)
