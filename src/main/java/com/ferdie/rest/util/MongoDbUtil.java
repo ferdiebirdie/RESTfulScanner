@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 
 import com.ferdie.rest.service.domain.Constants;
+import com.ferdie.rest.service.domain.ScanOrder;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -19,7 +20,7 @@ public enum MongoDbUtil implements Constants {
 	private MongoClient mongoClient;
 	final static Logger log = Logger.getLogger(MongoDbUtil.class);
 	
-	public Long getNextSequence() throws Exception {
+	public Long getNextSequence() {
 		DB db = getDB();
         DBCollection scanSeq = db.getCollection(SCAN_SEQUENCE);
         
@@ -30,23 +31,16 @@ public enum MongoDbUtil implements Constants {
 	    return ((Double)result.get("seq")).longValue();
 	}
 
-	public Long createScan(Long scannerId, Long orderId) throws Exception {
-		DB db;
-		try {
-			db = getDB();
-			DBCollection scan = db.getCollection(SCAN_TABLE);
-		    BasicDBObject document = new BasicDBObject();
-		    Long scanId = getNextSequence();
-		    document.append("_id", scanId);
-		    document.append("scannerId", scannerId);
-		    document.append("orderId", orderId);
-		    document.append("status", "Running");
-		    document.append("createTs", new Date());
-		    scan.insert(document);
-		    return scanId;
-		} catch (Exception e) {
-			throw e;
-		}
+	public void createScan(ScanOrder order) {
+		DB db = getDB();
+		DBCollection scan = db.getCollection(SCAN_TABLE);
+	    BasicDBObject document = new BasicDBObject();
+	    document.append("_id", order.getScanId());
+	    document.append("scannerId", order.getScannerId());
+	    document.append("orderId", order.getOrderId());
+	    document.append("status", "Running");
+	    document.append("createTs", new Date());
+	    scan.insert(document);
 	}
 
 	public void updateVulners(Long scanId, JSONArray vulners) {
@@ -54,7 +48,6 @@ public enum MongoDbUtil implements Constants {
 		try {
 			db = getDB();
 			DBCollection scan = db.getCollection(SCAN_TABLE);
-			
 			BasicDBObject newDocument = new BasicDBObject();
 			BasicDBObject updates = new BasicDBObject();
 			updates.append("status", "Completed");
@@ -115,7 +108,8 @@ public enum MongoDbUtil implements Constants {
 		return table.findOne(searchQuery);
 	}
 	
-	public DB getDB() throws Exception {
+	@SuppressWarnings("deprecation")
+	public DB getDB() {
 		if (null == mongoClient) {
 			mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.instance.getProperty(KEY_DB_URI)));	
 		}

@@ -1,10 +1,9 @@
 package com.ferdie.rest.service.domain;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+
+import com.ferdie.rest.util.JsonUtil;
 
 public class ScanOrder {
 	final static Logger log = Logger.getLogger(ScanOrder.class);
@@ -14,20 +13,22 @@ public class ScanOrder {
 	private String message;
 	private String status;
 	private String result;
-	private boolean isCreated;
+	private String url;
+	private Boolean isCreated = Boolean.FALSE;
 	
-	public ScanOrder(Long scannerId, String result) {
+	public ScanOrder(Long scannerId, String url, String result) {
 		this(result);
 		this.scannerId = scannerId;
+		this.url = url;
 		this.status = "Running";
 		this.isCreated = true;
 	}
 	
-	public boolean isCreated() {
+	public Boolean isCreated() {
 		return isCreated;
 	}
 
-	public void setCreated(boolean isCreated) {
+	public void setCreated(Boolean isCreated) {
 		this.isCreated = isCreated;
 	}
 	
@@ -40,7 +41,7 @@ public class ScanOrder {
 
 	@Override
 	public String toString() {
-		return "ScanOrder[orderId="+ orderId + ", scanId="+ scanId + ", scannerId="+ scannerId + ", message=" + message + ", status="+ status +"]";
+		return "ScanOrder[scanId="+ scanId + ", scannerId="+ scannerId + ", url=" + url +"]";
 	}
 
 	public String getMessage() {
@@ -59,20 +60,11 @@ public class ScanOrder {
 		this.status = status;
 	}
 	
-	public void parseJson(String result) {
-		//this.result = result;
-		if (StringUtils.isNotEmpty(result)) {
-			JSONParser parser = new JSONParser();
-			JSONObject json;
-			try {
-				json = (JSONObject) parser.parse(result);
-				orderId = (Long) json.get("id");
-				status = (String) json.get("status");
-				message = (String) json.get("message");
-			} catch (ParseException e) {
-				message = result;
-			}
-		}
+	private void parseJson(String result) {
+		JSONObject json = JsonUtil.instance.stringToJson(result);
+		orderId = (Long) json.get("id");
+		status = (String) json.get("status");
+		message = (String) json.get("message");
 	}
 
 	public String getResult() {
@@ -106,5 +98,14 @@ public class ScanOrder {
 	public void setScannerId(Long scannerId) {
 		this.scannerId = scannerId;
 	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
 
 }

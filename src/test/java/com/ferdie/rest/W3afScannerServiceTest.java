@@ -1,8 +1,5 @@
 package com.ferdie.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
@@ -20,10 +17,8 @@ public class W3afScannerServiceTest {
 	@Test
 	public void startScan() {
 		log.debug("Testing: startScan()....");
-		List<String> targetUrls = new ArrayList<String>();
-		targetUrls.add("http://www.webscantest.com/shutterform/");
-		targetUrls.add("http://www.webscantest.com/datastore/search_by_id.php");
-		ScanOrder result = svc.scan(targetUrls);
+		String url = "http://www.webscantest.com/shutterform/";
+		ScanOrder result = svc.scan(url);
 		log.debug(result);
 	}
 	

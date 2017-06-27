@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,32 +38,37 @@ import com.mongodb.BasicDBObject;
 public class W3afScannerService implements ScannerService, Constants {
 	final static Logger log = Logger.getLogger(W3afScannerService.class);
 
-	public ScanOrder scan(List<String> targetUrls) {
+	public ScanOrder scan(String url) {
 		ScanOrder scan = null;
-		JSONObject active = getActiveScan();
-		if (null != active) {
-			scan = new ScanOrder(active.toJSONString());
-			scan.setMessage("Previous scan still running. Try again later.");
-			scan.setOrderId((Long) active.get("id"));
-			return scan;
-		}
-		log.debug("------------------ Scan Started ------------------");
+//		JSONObject active = getActiveScan();
+//		if (null != active) {
+//			scan = new ScanOrder(active.toJSONString());
+//			scan.setMessage("Previous scan still running. Try again later.");
+//			scan.setOrderId(null);
+//			scan.setStatus(null);
+//			return scan;
+//		}
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
 		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + "/scans/");
 
+		List<String> urls = new ArrayList<String>(1);
+		urls.add(url);
 		Map<String, Object> json = new LinkedHashMap<String, Object>();
+		json.put("target_urls", urls);
 		json.put("scan_profile", getProfile());
-		json.put("target_urls", targetUrls);
-
+		
 		String input = JSONValue.toJSONString(json);
-
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.post(Entity.entity(input, MediaType.APPLICATION_JSON));
-
 		String result = response.readEntity(String.class);
-		scan = new ScanOrder(getScannerId(), result);
+		if (response.getStatus() == 201) { // success
+			log.debug("Successfully created scan order.");
+			scan = new ScanOrder(getScannerId(), url, result);
+		} else {
+			log.error("Failed creating scan order: " + result);
+			scan = new ScanOrder(result);
+		}
 		return scan;
-
 	}
 
 	public String deleteActiveScan() {
@@ -81,7 +87,7 @@ public class W3afScannerService implements ScannerService, Constants {
 			if (null != scan) {
 				return Objects.toString(scan);
 			} else {
-				return "{\"message\": \"Not found\"}";
+				return MSG_NOT_FOUND;
 			}
 			
 		} catch (Exception e) {
@@ -203,49 +209,41 @@ public class W3afScannerService implements ScannerService, Constants {
 		return null != scan && "Running".equals(scan.get("status"));
 	}
 
-	public void save(final ScanOrder scan) {
+	public void save(final ScanOrder order) {
 		try {
-			Long scanId = MongoDbUtil.instance.createScan(scan.getScannerId(), scan.getOrderId());
-			scan.setScanId(scanId);
-			
-			log.info("Acquired scanId=" + scan.getScanId());
+			MongoDbUtil.instance.createScan(order);
 			// give enough time for w3af to process first
 			try {
-				log.debug("Giving w3af enough time to process (5sec)....");
-				Thread.sleep(5000);
+				//log.debug("Giving w3af enough time to process (3sec)....");
+				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
 			}
 			if (isScanActive()) {
-				log.debug("Started saving vulnerabilities...");
-				Runnable r = new Runnable() {
-					public void run() {
-						final int waitingTime = 60;
-						while (true) {
-							boolean running = isScanRunning();
-							if (running) {
-								// add max time, if reached, exit with error message
-								log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
-								try {
-									Thread.sleep(waitingTime * 1000);
-								} catch (InterruptedException e) {
-									log.error("Error while sleeping", e);
-									break;
-								}
-							} else {
-								try {
-									saveVulners(scan.getScanId());
-									// temporary
-									deleteActiveScan();
-								} catch (ParseException e) {
-									log.error("Skipping scan delete", e);
-								}
-								break;
-							}
+				log.debug("Saving vulnerabilities...");
+				final int waitingTime = 60;
+				while (true) {
+					boolean running = isScanRunning();
+					if (running) {
+						// TODO: add max time, if reached, exit with error message
+						log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
+						try {
+							Thread.sleep(waitingTime * 1000);
+						} catch (InterruptedException e) {
+							log.error("Error while sleeping", e);
+							break;
 						}
+					} else {
+						try {
+							saveVulners(order.getScanId());
+							// temporary
+							deleteActiveScan();
+						} catch (ParseException e) {
+							log.error("Skipping scan delete", e);
+						}
+						break;
 					}
-				};
-				new Thread(r).start();
+				}
 			}
 
 		} catch (Exception e1) {
@@ -296,7 +294,7 @@ public class W3afScannerService implements ScannerService, Constants {
 			if (null != o) {
 				return o.toString();
 			}
-			return "{\"message\": \"Not found\"}";
+			return MSG_NOT_FOUND;
 		} catch (Exception e) {
 			log.error(e);
 			return "Error getting vulnerabilities. Check logs.";

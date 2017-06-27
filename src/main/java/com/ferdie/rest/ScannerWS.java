@@ -1,7 +1,5 @@
 package com.ferdie.rest;
 
-import java.util.List;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -10,19 +8,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.service.ScannerServiceFacade;
-import com.ferdie.rest.service.domain.ScanOrder;
+import com.ferdie.rest.service.domain.Constants;
 
 /**
  * @author ferdie
  *
  */
 @Path("/scanner")
-public class ScannerWS {
+public class ScannerWS implements Constants {
 	final static Logger log = Logger.getLogger(ScannerWS.class);
 	ScannerServiceFacade svcFacade = new ScannerServiceFacade();
 	
@@ -30,15 +25,8 @@ public class ScannerWS {
 	@GET
 	@Path("/scan")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String scan(@QueryParam("scannerId") Long scannerId, @QueryParam("urls") final List<String> targetUrls) {
-		ScanOrder result = svcFacade.scan(scannerId, targetUrls);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-		} catch (JsonProcessingException e) {
-			log.error(e);
-			return "Error";
-		}
+	public String scan(@QueryParam("scannerId") Long scannerId, @QueryParam("url") final String url) {
+		return svcFacade.queueScan(scannerId, url);
 	}
 	
 	// /status?scanId=123
@@ -46,17 +34,7 @@ public class ScannerWS {
 	@Path("/status")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getScanStatus(@QueryParam("scanId") Long scanId) {
-		String result = svcFacade.getScanStatus(scanId);
-		ObjectMapper mapper = new ObjectMapper();
-		JSONObject json;
-		try {
-			json = mapper.readValue(result, JSONObject.class);
-			json.remove("vulnerabilities");
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-		} catch (Exception e) {
-			log.error(e);
-			return "Error";
-		}
+		return svcFacade.getScanStatus(scanId);
 	}
 	
 	// /vulner?scanId=123
@@ -64,16 +42,7 @@ public class ScannerWS {
 	@Path("/vulner")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getVulnerabilities(@QueryParam("scanId") Long scanId) {
-		String result = svcFacade.getVulnerabilities(scanId);
-		ObjectMapper mapper = new ObjectMapper();
-		Object json;
-		try {
-			json = mapper.readValue(result, Object.class);
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-		} catch (Exception e) {
-			log.error(e);
-			return "Error";
-		}
+		return svcFacade.getVulnerabilities(scanId);
 	}
 	
 	// /delete?id=123
@@ -83,6 +52,6 @@ public class ScannerWS {
 	public Response deleteScan() {
 		log.debug("Deleting active scan order...");
 		String result = svcFacade.deleteScan();
-		return Response.ok(result).build(); 
+		return Response.ok(result).build();
 	}
 }

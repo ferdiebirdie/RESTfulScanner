@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.ferdie.rest.service.domain.Constants;
+import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.util.MongoDbUtil;
 import com.ferdie.rest.util.PropertiesUtil;
 import com.mongodb.BasicDBObject;
@@ -38,9 +39,13 @@ public class MongoDbTest implements Constants {
 	
 	@Test
 	public void testCreateScan() throws Exception {
-		Long id = MongoDbUtil.instance.createScan(1L, 1L);
-		log.debug("ID: " + id);
-		findById(id);
+		ScanOrder order = new ScanOrder();
+		order.setScanId(1L);
+		order.setScannerId(1L);
+		order.setOrderId(1L);
+		MongoDbUtil.instance.createScan(order);
+		log.debug("ID: " + order.getScanId());
+		findById(order.getScanId());
 	}
 	
 	@Test
@@ -58,7 +63,7 @@ public class MongoDbTest implements Constants {
 	@Test
 	public void test() throws Exception {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.instance.getProperty(KEY_DB_URI)));
-		System.out.println(mongoClient);
+		log.debug(mongoClient);
 		mongoClient.close();
 	}
 }

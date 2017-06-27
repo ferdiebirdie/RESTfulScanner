@@ -1,12 +1,10 @@
 package com.ferdie.rest.service;
 
-import java.util.List;
-
 import com.ferdie.rest.service.domain.ScanOrder;
 
 public interface ScannerService {
 	
-	ScanOrder scan(List<String> targetUrls);
+	ScanOrder scan(String url);
 	
 	void save(ScanOrder result);
 	
