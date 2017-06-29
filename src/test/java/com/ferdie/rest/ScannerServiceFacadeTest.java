@@ -17,7 +17,7 @@ public class ScannerServiceFacadeTest {
 		log.debug("Testing: startScan()....");
 		String url = "http://www.webscantest.com/shutterform/";
 //		targetUrls.add("http://www.webscantest.com/datastore/search_by_id.php");
-		svcFacade.queueScan(Scanner.W3AF.getId(), url, MongoDbUtil.instance.getNextSequence());
+		svcFacade.queueScan(Scanner.W3AF.getId(), url, MongoDbUtil.MongoDbUtil.getNextSequence());
 	}
 	
 	@Test

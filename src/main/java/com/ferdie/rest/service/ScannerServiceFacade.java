@@ -1,5 +1,8 @@
 package com.ferdie.rest.service;
 
+import static com.ferdie.rest.util.JsonUtil.JsonUtil;
+import static com.ferdie.rest.util.MongoDbUtil.MongoDbUtil;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +16,6 @@ import com.ferdie.rest.rabbitmq.QueueProducer;
 import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
-import com.ferdie.rest.util.JsonUtil;
-import com.ferdie.rest.util.MongoDbUtil;
 
 public class ScannerServiceFacade implements Constants {
 	final static Logger log = Logger.getLogger(ScannerServiceFacade.class);
@@ -30,7 +31,8 @@ public class ScannerServiceFacade implements Constants {
 			producer = new QueueProducer(RABBITMQ_QUEUE_NAME);
 			HashMap<String, Object> msg = new HashMap<String, Object>(2);
 			if (null == scanId) {
-				scanId = getNextScanId();	
+				scanId = getNextScanId();
+				MongoDbUtil.createScan(new ScanOrder(scanId, scannerId, url, SHEDULED));
 			}
 			msg.put("scanId", scanId);
 			msg.put("scannerId", scannerId);
@@ -38,8 +40,8 @@ public class ScannerServiceFacade implements Constants {
 			producer.sendMessage(msg);
 			log.debug("Message sent: " + msg);
 			
-			ObjectMapper mapper = JsonUtil.instance.getObjectMapper();
-			String s = "{\"scanId\": " + scanId + ", \"message\": \"Request now in queue.\"}";
+			ObjectMapper mapper = JsonUtil.getObjectMapper();
+			String s = "{\"scanId\": " + scanId + ", \"status\": \"Scheduled\"}";
 			Object json = mapper.readValue(s, Object.class);
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (IOException | TimeoutException e1) {
@@ -57,10 +59,14 @@ public class ScannerServiceFacade implements Constants {
 		ScanOrder scan;
 		switch (Scanner.toScanner(scannerId)) {
 			case W3AF:
+				// insert to DB
 				scan = svc.scan(url);
 				if (scan.isCreated()) {
+					MongoDbUtil.updateStatus(scanId, RUNNING);
 					scan.setScanId(scanId);
 					svc.save(scan);
+				} else {
+					MongoDbUtil.updateStatus(scanId, FAILED);
 				}
 				break;
 			// TODO: handle other scanners
@@ -71,13 +77,16 @@ public class ScannerServiceFacade implements Constants {
 	}
 	
 	public String getScanStatus(Long scanId) {
+		// check rabbit, if found, status=scheduled
+		// check 
+		
+		
 		String result = svc.getScanStatus(scanId);
-		ObjectMapper mapper = JsonUtil.instance.getObjectMapper();
+		ObjectMapper mapper = JsonUtil.getObjectMapper();
 		JSONObject json;
 		try {
 			json = mapper.readValue(result, JSONObject.class);
-			json.remove("vulnerabilities");
-			return  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+			return JsonUtil.prettyPrint("{\"status\" : \"" + json.get("status") + "\"}");
 		} catch (Exception e) {
 			log.error(e);
 			return MSG_ERR_LOGS;
@@ -86,7 +95,7 @@ public class ScannerServiceFacade implements Constants {
 
 	public String getVulnerabilities(Long scanId) {
 		String result = svc.getVulnerabilities(scanId);
-		ObjectMapper mapper = JsonUtil.instance.getObjectMapper();
+		ObjectMapper mapper = JsonUtil.getObjectMapper();
 		Object json;
 		try {
 			json = mapper.readValue(result, Object.class);
@@ -102,7 +111,7 @@ public class ScannerServiceFacade implements Constants {
 	}
 	
 	public Long getNextScanId() {
-		return MongoDbUtil.instance.getNextSequence();
+		return MongoDbUtil.getNextSequence();
 	}
 
 }

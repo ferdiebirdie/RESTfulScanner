@@ -31,8 +31,10 @@ import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanAction;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
-import com.ferdie.rest.util.MongoDbUtil;
-import com.ferdie.rest.util.PropertiesUtil;
+import static com.ferdie.rest.util.MongoDbUtil.MongoDbUtil;
+
+import static com.ferdie.rest.util.JsonUtil.JsonUtil;
+import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
 import com.mongodb.BasicDBObject;
 
 public class W3afScannerService implements ScannerService, Constants {
@@ -40,16 +42,8 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	public ScanOrder scan(String url) {
 		ScanOrder scan = null;
-//		JSONObject active = getActiveScan();
-//		if (null != active) {
-//			scan = new ScanOrder(active.toJSONString());
-//			scan.setMessage("Previous scan still running. Try again later.");
-//			scan.setOrderId(null);
-//			scan.setStatus(null);
-//			return scan;
-//		}
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
-		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + "/scans/");
+		WebTarget webTarget = client.target(PropertiesUtil.getProperty(KEY_WS_URL_W3AF) + "/scans/");
 
 		List<String> urls = new ArrayList<String>(1);
 		urls.add(url);
@@ -72,18 +66,17 @@ public class W3afScannerService implements ScannerService, Constants {
 	}
 
 	public String deleteActiveScan() {
-		JSONObject json = getActiveScan();
-		Long id = (Long) json.get("id");
-		return manageScanOrder(ScanAction.DELETE, id);
+		Long id = getActiveOrderId();
+		if (null != id) {
+			return manageScanOrder(ScanAction.DELETE, id);
+		} else {
+			return JsonUtil.prettyPrint(MSG_NOTHING_DELETED);
+		}
 	}
 
-//	public String getScanStatus(Long orderId) {
-//		return manageScanOrder(ScanAction.GET_STATUS, orderId);
-//	}
-	
 	public String getScanStatus(Long scanId) {
 		try {
-			BasicDBObject scan = (BasicDBObject) MongoDbUtil.instance.findById(scanId);
+			BasicDBObject scan = (BasicDBObject) MongoDbUtil.findById(scanId);
 			if (null != scan) {
 				return Objects.toString(scan);
 			} else {
@@ -124,7 +117,7 @@ public class W3afScannerService implements ScannerService, Constants {
 			reqUrl = reqUrl + orderId;
 
 			Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
-			WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + reqUrl);
+			WebTarget webTarget = client.target(PropertiesUtil.getProperty(KEY_WS_URL_W3AF) + reqUrl);
 
 			Invocation.Builder invocationBuilder = webTarget.request();
 			Response response = invocationBuilder.delete();
@@ -136,7 +129,7 @@ public class W3afScannerService implements ScannerService, Constants {
 			break;
 		}
 		Client client = ClientBuilder.newClient(new ClientConfig().register(LoggingFeature.class));
-		WebTarget webTarget = client.target(PropertiesUtil.instance.getProperty(KEY_WS_URL_W3AF) + reqUrl);
+		WebTarget webTarget = client.target(PropertiesUtil.getProperty(KEY_WS_URL_W3AF) + reqUrl);
 
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
@@ -182,6 +175,14 @@ public class W3afScannerService implements ScannerService, Constants {
 		}
 		return "";
 	}
+	
+	private Long getActiveOrderId() {
+		JSONObject json = getActiveScan();
+		if (null != json) {
+			return (Long) json.get("id");
+		}
+		return null;
+	}
 
 	private JSONObject getActiveScan() {
 		JSONParser parser = new JSONParser();
@@ -199,7 +200,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		}
 		return null;
 	}
-
+	
 	public boolean isScanActive() {
 		return null != getActiveScan();
 	}
@@ -209,9 +210,8 @@ public class W3afScannerService implements ScannerService, Constants {
 		return null != scan && "Running".equals(scan.get("status"));
 	}
 
-	public void save(final ScanOrder order) {
+	public void save(ScanOrder order) {
 		try {
-			MongoDbUtil.instance.createScan(order);
 			// give enough time for w3af to process first
 			try {
 				//log.debug("Giving w3af enough time to process (3sec)....");
@@ -236,7 +236,6 @@ public class W3afScannerService implements ScannerService, Constants {
 					} else {
 						try {
 							saveVulners(order.getScanId());
-							// temporary
 							deleteActiveScan();
 						} catch (ParseException e) {
 							log.error("Skipping scan delete", e);
@@ -244,6 +243,8 @@ public class W3afScannerService implements ScannerService, Constants {
 						break;
 					}
 				}
+			} else {
+				MongoDbUtil.updateStatus(order.getScanId(), FAILED);
 			}
 
 		} catch (Exception e1) {
@@ -253,34 +254,30 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	@SuppressWarnings("unchecked")
 	public void saveVulners(Long scanId) throws ParseException {
-		Long orderId = (Long) MongoDbUtil.instance.findById(scanId, "orderId");
-		if (null == orderId) {
-			log.warn("Vulnerabilities not saved! ScanId=" + scanId + " not found in database." );
-		} else {
-			log.debug("Saving vulnerabilities...");
-			JSONParser parser = new JSONParser();
-			JSONObject json;
-			try {
-				String kbALl = manageScanOrder(ScanAction.GET_VULN_ALL, orderId);
-				json = (JSONObject) parser.parse(kbALl);
-				JSONArray items = (JSONArray) json.get("items");
-				if (null != items && items.size() > 0) {
-					JSONArray details = new JSONArray();
-					for (Object o : items) {
-						JSONObject item = (JSONObject) o;
-						Long id = (Long) item.get("id");
-						String kb = manageScanOrder(ScanAction.GET_VULN_BY_ID, orderId, id);
-						details.add(parser.parse(kb));
-					}
-					MongoDbUtil.instance.updateVulners(scanId, details);
-					log.debug("Saved " + items.size() + " vulnerabilities.");
-				} else {
-					log.debug("No vulnerabilities found.");
+		log.debug("Saving vulnerabilities...");
+		JSONParser parser = new JSONParser();
+		JSONObject json;
+		try {
+			Long orderId = getActiveOrderId();
+			String kbALl = manageScanOrder(ScanAction.GET_VULN_ALL, orderId);
+			json = (JSONObject) parser.parse(kbALl);
+			JSONArray items = (JSONArray) json.get("items");
+			if (null != items && items.size() > 0) {
+				JSONArray details = new JSONArray();
+				for (Object o : items) {
+					JSONObject item = (JSONObject) o;
+					Long id = (Long) item.get("id");
+					String kb = manageScanOrder(ScanAction.GET_VULN_BY_ID, orderId, id);
+					details.add(parser.parse(kb));
 				}
-			} catch (ParseException e) {
-				log.error("Error saving vulnerabilities. Check logs.", e);
-				throw e;
+				MongoDbUtil.updateVulners(scanId, details);
+				log.debug("Saved " + items.size() + " vulnerabilities.");
+			} else {
+				log.debug("No vulnerabilities found.");
 			}
+		} catch (ParseException e) {
+			log.error("Error saving vulnerabilities. Check logs.", e);
+			throw e;
 		}
 	}
 
@@ -290,7 +287,7 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	public String getVulnerabilities(Long scanId) {
 		try {
-			Object o = MongoDbUtil.instance.findById(scanId, "vulnerabilities");
+			Object o = MongoDbUtil.findById(scanId, "vulnerabilities");
 			if (null != o) {
 				return o.toString();
 			}

@@ -1,12 +1,13 @@
 package com.ferdie.rest.mongo;
 
+import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.util.MongoDbUtil;
-import com.ferdie.rest.util.PropertiesUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -24,7 +25,7 @@ public class MongoDbTest implements Constants {
 	}
 	
 	private void findById(Long id) throws Exception {
-		DB db = MongoDbUtil.instance.getDB();
+		DB db = MongoDbUtil.MongoDbUtil.getDB();
 		DBCollection table = db.getCollection("scan");
 			
 		// search
@@ -43,7 +44,7 @@ public class MongoDbTest implements Constants {
 		order.setScanId(1L);
 		order.setScannerId(1L);
 		order.setOrderId(1L);
-		MongoDbUtil.instance.createScan(order);
+		MongoDbUtil.MongoDbUtil.createScan(order);
 		log.debug("ID: " + order.getScanId());
 		findById(order.getScanId());
 	}
@@ -51,18 +52,18 @@ public class MongoDbTest implements Constants {
 	@Test
 	public void testUpdateScan() throws Exception {
 		Long id = 8L;
-		MongoDbUtil.instance.updateVulners(id, null);
+		MongoDbUtil.MongoDbUtil.updateVulners(id, null);
 		findById(id);
 	}
 
 	@Test
 	public void testGetNextSequence() throws Exception {
-		log.debug(MongoDbUtil.instance.getNextSequence());
+		log.debug(MongoDbUtil.MongoDbUtil.getNextSequence());
 	}
 	
 	@Test
 	public void test() throws Exception {
-		MongoClient mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.instance.getProperty(KEY_DB_URI)));
+		MongoClient mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.getProperty(KEY_DB_URI)));
 		log.debug(mongoClient);
 		mongoClient.close();
 	}

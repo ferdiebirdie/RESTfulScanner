@@ -8,6 +8,12 @@ public interface Constants {
 	String SCAN_TABLE = "scan";
 	String SCAN_SEQUENCE = "scanSeq";
 	
+	// Scan Statuses
+	String SHEDULED = "Scheduled";
+	String RUNNING = "Running";
+	String COMPLETED = "Completed";
+	String FAILED = "Failed";
+	
 	// WEBSERVICES
 	String KEY_WS_URL_W3AF = "ws.url.w3af";
 	
@@ -16,7 +22,8 @@ public interface Constants {
 	String KEY_DB_URI = "db.uri";
 	
 	// messages
-	String MSG_NOT_FOUND = "{\"message\": \"Not found\"}";
+	String MSG_NOTHING_DELETED = "{\"message\": \"Nothing deleted.\"}";
+	String MSG_NOT_FOUND = "{\"message\": \"Not found.\"}";
 	String MSG_ERR_LOGS = "{\"message\": \"Error was encountered. Check logs for details.\"}";
 	
 	// RabbitMQ

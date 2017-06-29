@@ -1,9 +1,9 @@
 package com.ferdie.rest.service.domain;
 
+import static com.ferdie.rest.util.JsonUtil.JsonUtil;
+
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
-
-import com.ferdie.rest.util.JsonUtil;
 
 public class ScanOrder {
 	final static Logger log = Logger.getLogger(ScanOrder.class);
@@ -39,6 +39,13 @@ public class ScanOrder {
 	public ScanOrder() {
 	}
 
+	public ScanOrder(Long scanId, Long scannerId, String url, String status) {
+		this.scanId = scanId;
+		this.scannerId = scannerId;
+		this.url = url;
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
 		return "ScanOrder[scanId="+ scanId + ", scannerId="+ scannerId + ", url=" + url +"]";
@@ -61,7 +68,7 @@ public class ScanOrder {
 	}
 	
 	private void parseJson(String result) {
-		JSONObject json = JsonUtil.instance.stringToJson(result);
+		JSONObject json = JsonUtil.stringToJson(result);
 		orderId = (Long) json.get("id");
 		status = (String) json.get("status");
 		message = (String) json.get("message");

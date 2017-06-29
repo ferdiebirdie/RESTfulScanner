@@ -1,12 +1,13 @@
 package com.ferdie.rest.rabbitmq;
 
+import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
 import com.ferdie.rest.service.domain.Constants;
-import com.ferdie.rest.util.PropertiesUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -24,7 +25,7 @@ public abstract class EndPoint implements Constants {
 		ConnectionFactory factory = new ConnectionFactory();
 
 		// hostname of your rabbitmq server
-		factory.setHost(PropertiesUtil.instance.getProperty(KEY_RABBITMQ_HOST));
+		factory.setHost(PropertiesUtil.getProperty(KEY_RABBITMQ_HOST));
 		factory.setVirtualHost(RABBITMQ_VHOST);
 
 		// getting a connection

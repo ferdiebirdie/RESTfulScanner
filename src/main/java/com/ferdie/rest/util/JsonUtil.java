@@ -1,5 +1,7 @@
 package com.ferdie.rest.util;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -10,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public enum JsonUtil {
-	instance;
+	JsonUtil;
 	
 	final static Logger log = Logger.getLogger(JsonUtil.class);
 	
@@ -38,6 +40,16 @@ public enum JsonUtil {
 			}
 		}
 		return defaultJson;
+	}
+	
+	public String prettyPrint(String str) {
+		try {
+			Object json = mapper.readValue(str, Object.class);
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+		} catch (IOException e) {
+			log.warn(e);
+			return str;
+		}
 	}
 
 }

@@ -10,7 +10,7 @@ import com.ferdie.rest.service.ScannerServiceFacade;
 import com.ferdie.rest.service.domain.Constants;
 
 public enum PropertiesUtil implements Constants {
-	instance;
+	PropertiesUtil;
 	
 	final static Logger log = Logger.getLogger(ScannerServiceFacade.class);
 	private Properties props;

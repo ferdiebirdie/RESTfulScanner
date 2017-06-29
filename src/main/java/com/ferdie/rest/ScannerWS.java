@@ -1,5 +1,9 @@
 package com.ferdie.rest;
 
+import static com.ferdie.rest.util.CommonUtil.CommonUtil;
+import static com.ferdie.rest.util.JsonUtil.JsonUtil;
+import static com.ferdie.rest.util.ValidatorUtil.ValidatorUtil;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -25,24 +29,35 @@ public class ScannerWS implements Constants {
 	@GET
 	@Path("/scan")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String scan(@QueryParam("scannerId") Long scannerId, @QueryParam("url") final String url) {
-		return svcFacade.queueScan(scannerId, url);
+	public String scan(@QueryParam("scannerId") String scannerId, @QueryParam("url") String url) {
+		if (!ValidatorUtil.isValidScannerId(scannerId)) {
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scannerId) + "\"}");
+		} else if (!ValidatorUtil.isValidUrl(url)) {
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: url - " + CommonUtil.encodeParam(url) + "\"}");
+		}
+		return svcFacade.queueScan(Long.parseLong(scannerId), url);
 	}
 	
 	// /status?scanId=123
 	@GET
 	@Path("/status")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getScanStatus(@QueryParam("scanId") Long scanId) {
-		return svcFacade.getScanStatus(scanId);
+	public String getScanStatus(@QueryParam("scanId") String scanId) {
+		if (!ValidatorUtil.isValidScanId(scanId)) {
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scanId) + "\"}");
+		}
+		return svcFacade.getScanStatus(Long.parseLong(scanId));
 	}
 	
 	// /vulner?scanId=123
 	@GET
 	@Path("/vulner")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getVulnerabilities(@QueryParam("scanId") Long scanId) {
-		return svcFacade.getVulnerabilities(scanId);
+	public String getVulnerabilities(@QueryParam("scanId") String scanId) {
+		if (!ValidatorUtil.isValidScanId(scanId)) {
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scanId) + "\"}");
+		}
+		return svcFacade.getVulnerabilities(Long.parseLong(scanId));
 	}
 	
 	// /delete?id=123
