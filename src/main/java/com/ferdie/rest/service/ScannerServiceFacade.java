@@ -61,7 +61,7 @@ public class ScannerServiceFacade implements Constants {
 		switch (Scanner.toScanner(scannerId)) {
 			case W3AF:
 				// insert to DB
-				deleteActiveScan();
+				svc.deleteActiveScan();
 				scan = svc.scan(url);
 				if (scan.isCreated()) {
 					MongoDbUtil.updateStatus(scanId, RUNNING);
