@@ -42,7 +42,7 @@ public class ScannerServiceFacade implements Constants {
 			log.debug("Message sent: " + msg);
 			
 			ObjectMapper mapper = JsonUtil.getObjectMapper();
-			String s = "{\"scanId\": " + scanId + ", \"status\": \"Scheduled\"}";
+			String s = "{\"scanId\": " + scanId + ", \"status\": \"scheduled\"}";
 			Object json = mapper.readValue(s, Object.class);
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (IOException | TimeoutException e1) {
