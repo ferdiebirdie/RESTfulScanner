@@ -6,6 +6,7 @@ import static com.ferdie.rest.util.MongoDbUtil.MongoDbUtil;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
@@ -77,16 +78,12 @@ public class ScannerServiceFacade implements Constants {
 	}
 	
 	public String getScanStatus(Long scanId) {
-		// check rabbit, if found, status=scheduled
-		// check 
-		
-		
 		String result = svc.getScanStatus(scanId);
 		ObjectMapper mapper = JsonUtil.getObjectMapper();
 		JSONObject json;
 		try {
 			json = mapper.readValue(result, JSONObject.class);
-			return JsonUtil.prettyPrint("{\"status\" : \"" + json.get("status") + "\"}");
+			return JsonUtil.prettyPrint("{\"status\" : \"" + Objects.toString(json.get("status"), "Not found") + "\"}");
 		} catch (Exception e) {
 			log.error(e);
 			return MSG_ERR_LOGS;
