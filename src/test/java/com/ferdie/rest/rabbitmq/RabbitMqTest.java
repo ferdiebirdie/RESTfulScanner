@@ -16,17 +16,17 @@ public class RabbitMqTest implements Constants {
 	final static Logger log = Logger.getLogger(RabbitMqTest.class);
 	
 	public static void main(String[] args) throws IOException, TimeoutException {
-		QueueConsumer consumer = new QueueConsumer(RABBITMQ_QUEUE_NAME);
-		Thread consumerThread = new Thread(consumer);
-		consumerThread.start();
+//		QueueConsumer consumer = new QueueConsumer(RABBITMQ_QUEUE_NAME);
+//		Thread consumerThread = new Thread(consumer);
+//		consumerThread.start();
 		
-//		ScannerServiceFacade fac = new ScannerServiceFacade();
-//		List<String> urls = new ArrayList<String>(2);
-//		urls.add("http://www.webscantest.com/shutterform");
-//		urls.add("http://www.webscantest.com/crosstraining");
-//		for (String url : urls) {
-//			System.out.println(fac.queueScan(1L, url, fac.getNextScanId()));
-//		}
+		ScannerServiceFacade fac = new ScannerServiceFacade();
+		List<String> urls = new ArrayList<String>(2);
+		urls.add("http://www.webscantest.com/shutterform");
+		urls.add("http://www.webscantest.com/crosstraining");
+		for (String url : urls) {
+			System.out.println(fac.queueScan(1L, url, fac.getNextScanId()));
+		}
 	}
 	
 	public static void main_(String[] args) throws IOException, TimeoutException {
