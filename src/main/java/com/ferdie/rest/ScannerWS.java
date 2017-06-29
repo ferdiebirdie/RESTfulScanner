@@ -31,9 +31,9 @@ public class ScannerWS implements Constants {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String scan(@QueryParam("scannerId") String scannerId, @QueryParam("url") String url) {
 		if (!ValidatorUtil.isValidScannerId(scannerId)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scannerId) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Missing or invalid parameter: scannerId - " + CommonUtil.encodeParam(scannerId) + "\"}");
 		} else if (!ValidatorUtil.isValidUrl(url)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: url - " + CommonUtil.encodeParam(url) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Missing or invalid parameter: url - " + CommonUtil.encodeParam(url) + "\"}");
 		}
 		return svcFacade.queueScan(Long.parseLong(scannerId), url);
 	}

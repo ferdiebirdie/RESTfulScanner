@@ -3,6 +3,7 @@ package com.ferdie.rest.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 public enum CommonUtil {
@@ -12,9 +13,8 @@ public enum CommonUtil {
 	
 	public String encodeParam(String param) {
 		try {
-			return URLEncoder.encode(param, "UTF-8");
+			return URLEncoder.encode(StringUtils.trimToEmpty(param), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			log.warn(e);
 			return param;
 		}
 	}
