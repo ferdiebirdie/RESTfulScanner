@@ -220,7 +220,7 @@ public class W3afScannerService implements ScannerService, Constants {
 				log.error("Error: ", e);
 			}
 			if (isScanActive()) {
-				log.debug("Saving vulnerabilities...");
+				//log.debug("Saving vulnerabilities...");
 				final int waitingTime = 60;
 				while (true) {
 					boolean running = isScanRunning();
@@ -236,7 +236,6 @@ public class W3afScannerService implements ScannerService, Constants {
 					} else {
 						try {
 							saveVulners(order.getScanId());
-							deleteActiveScan();
 						} catch (ParseException e) {
 							log.error("Skipping scan delete", e);
 						}
@@ -276,7 +275,7 @@ public class W3afScannerService implements ScannerService, Constants {
 				log.debug("No vulnerabilities found.");
 			}
 		} catch (ParseException e) {
-			log.error("Error saving vulnerabilities. Check logs.", e);
+			log.error("Error saving vulnerabilities.", e);
 			throw e;
 		}
 	}

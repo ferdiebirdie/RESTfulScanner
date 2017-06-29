@@ -66,7 +66,7 @@ public class ScannerWS implements Constants {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteScan() {
 		log.debug("Deleting active scan order...");
-		String result = svcFacade.deleteScan();
+		String result = svcFacade.deleteActiveScan();
 		return Response.ok(result).build();
 	}
 }
