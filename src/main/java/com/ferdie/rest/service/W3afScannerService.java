@@ -210,7 +210,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		return null != scan && "Running".equals(scan.get("status"));
 	}
 
-	public void save(ScanOrder order) {
+	public boolean save(ScanOrder order) {
 		try {
 			// give enough time for w3af to process first
 			try {
@@ -234,20 +234,18 @@ public class W3afScannerService implements ScannerService, Constants {
 							break;
 						}
 					} else {
-						try {
-							saveVulners(order.getScanId());
-						} catch (ParseException e) {
-							log.error("Skipping scan delete", e);
-						}
+						saveVulners(order.getScanId());
 						break;
 					}
 				}
 			} else {
-				MongoDbUtil.updateStatus(order.getScanId(), FAILED);
+				log.warn("No active scan detected!");
+				//MongoDbUtil.updateStatus(order.getScanId(), FAILED);
 			}
-
+			return true;
 		} catch (Exception e1) {
 			log.error(e1);
+			return false;
 		}
 	}
 

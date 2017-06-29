@@ -57,7 +57,6 @@ public enum MongoDbUtil implements Constants {
 			DBCollection scan = db.getCollection(SCAN_TABLE);
 			BasicDBObject newDocument = new BasicDBObject();
 			BasicDBObject updates = new BasicDBObject();
-			updates.append("status", "Completed");
 			updates.append("vulnerabilities", vulners);
 			newDocument.append("$set", updates);
 			

@@ -66,7 +66,8 @@ public class ScannerServiceFacade implements Constants {
 				if (scan.isCreated()) {
 					MongoDbUtil.updateStatus(scanId, RUNNING);
 					scan.setScanId(scanId);
-					svc.save(scan);
+					boolean isSuccess = svc.save(scan);
+					MongoDbUtil.updateStatus(scanId, isSuccess ? COMPLETED : FAILED);
 				} else {
 					MongoDbUtil.updateStatus(scanId, FAILED);
 				}

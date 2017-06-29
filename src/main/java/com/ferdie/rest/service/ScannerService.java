@@ -6,7 +6,7 @@ public interface ScannerService {
 	
 	ScanOrder scan(String url);
 	
-	void save(ScanOrder result);
+	boolean save(ScanOrder result);
 	
 	String getScanStatus(Long id);
 	
