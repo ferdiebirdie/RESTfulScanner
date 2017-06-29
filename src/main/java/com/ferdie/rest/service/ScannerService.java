@@ -12,7 +12,7 @@ public interface ScannerService {
 	
 	String getActiveScans();
 	
-	Long getScannerId();
+	Integer getScannerId();
 
 	String getVulnerabilities(Long scanId);
 	

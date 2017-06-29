@@ -42,7 +42,7 @@ public class MongoDbTest implements Constants {
 	public void testCreateScan() throws Exception {
 		ScanOrder order = new ScanOrder();
 		order.setScanId(1L);
-		order.setScannerId(1L);
+		order.setScannerId(1);
 		order.setOrderId(1L);
 		MongoDbUtil.MongoDbUtil.createScan(order);
 		log.debug("ID: " + order.getScanId());

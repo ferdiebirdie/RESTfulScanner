@@ -9,14 +9,14 @@ public class ScanOrder {
 	final static Logger log = Logger.getLogger(ScanOrder.class);
 	private Long scanId;
 	private Long orderId;
-	private Long scannerId;
+	private Integer scannerId;
 	private String message;
 	private String status;
 	private String result;
 	private String url;
 	private Boolean isCreated = Boolean.FALSE;
 	
-	public ScanOrder(Long scannerId, String url, String result) {
+	public ScanOrder(Integer scannerId, String url, String result) {
 		this(result);
 		this.scannerId = scannerId;
 		this.url = url;
@@ -39,7 +39,7 @@ public class ScanOrder {
 	public ScanOrder() {
 	}
 
-	public ScanOrder(Long scanId, Long scannerId, String url, String status) {
+	public ScanOrder(Long scanId, Integer scannerId, String url, String status) {
 		this.scanId = scanId;
 		this.scannerId = scannerId;
 		this.url = url;
@@ -98,11 +98,11 @@ public class ScanOrder {
 		this.orderId = orderId;
 	}
 
-	public Long getScannerId() {
+	public Integer getScannerId() {
 		return scannerId;
 	}
 
-	public void setScannerId(Long scannerId) {
+	public void setScannerId(Integer scannerId) {
 		this.scannerId = scannerId;
 	}
 

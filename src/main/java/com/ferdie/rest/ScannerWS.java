@@ -11,10 +11,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ferdie.rest.service.ScannerServiceFacade;
 import com.ferdie.rest.service.domain.Constants;
+import com.ferdie.rest.service.domain.Scanner;
 
 /**
  * @author ferdie
@@ -31,11 +33,12 @@ public class ScannerWS implements Constants {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String scan(@QueryParam("scannerId") String scannerId, @QueryParam("url") String url) {
 		if (!ValidatorUtil.isValidScannerId(scannerId)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Missing or invalid parameter: scannerId - " + CommonUtil.encodeParam(scannerId) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId ( " + CommonUtil.encodeParam(scannerId) + " )\"}");
 		} else if (!ValidatorUtil.isValidUrl(url)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Missing or invalid parameter: url - " + CommonUtil.encodeParam(url) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Missing or invalid parameter: url ( " + CommonUtil.encodeParam(url) + " )\"}");
 		}
-		return svcFacade.queueScan(Long.parseLong(scannerId), url);
+		Integer id = StringUtils.isEmpty(scannerId) ? Scanner.W3AF.getId() : Integer.parseInt(scannerId);
+		return svcFacade.queueScan(id, url);
 	}
 	
 	// /status?scanId=123
@@ -44,7 +47,7 @@ public class ScannerWS implements Constants {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getScanStatus(@QueryParam("scanId") String scanId) {
 		if (!ValidatorUtil.isValidScanId(scanId)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scanId) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scanId (" + CommonUtil.encodeParam(scanId) + " )\"}");
 		}
 		return svcFacade.getScanStatus(Long.parseLong(scanId));
 	}
@@ -55,7 +58,7 @@ public class ScannerWS implements Constants {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getVulnerabilities(@QueryParam("scanId") String scanId) {
 		if (!ValidatorUtil.isValidScanId(scanId)) {
-			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scannerId - " + CommonUtil.encodeParam(scanId) + "\"}");
+			return JsonUtil.prettyPrint("{\"message\" : \"Invalid parameter: scanId ( " + CommonUtil.encodeParam(scanId) + " )\"}");
 		}
 		return svcFacade.getVulnerabilities(Long.parseLong(scanId));
 	}

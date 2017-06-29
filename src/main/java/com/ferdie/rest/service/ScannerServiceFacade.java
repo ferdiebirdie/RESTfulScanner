@@ -22,11 +22,11 @@ public class ScannerServiceFacade implements Constants {
 	final static Logger log = Logger.getLogger(ScannerServiceFacade.class);
 	private W3afScannerService svc = new W3afScannerService();
 	
-	public String queueScan(Long scannerId, String url) {
+	public String queueScan(Integer scannerId, String url) {
 		return queueScan(scannerId, url, null);
 	}
 	
-	public String queueScan(Long scannerId, String url, Long scanId) {
+	public String queueScan(Integer scannerId, String url, Long scanId) {
 		QueueProducer producer;
 		try {
 			producer = new QueueProducer(RABBITMQ_QUEUE_NAME);
@@ -53,7 +53,7 @@ public class ScannerServiceFacade implements Constants {
 	
 	public void scan(Map<String, Object> map) {
 		log.debug("Scan Start: " + map);
-		Long scannerId = (Long) map.get(SCANNER_ID);
+		Integer scannerId = (Integer) map.get(SCANNER_ID);
 		Long scanId = (Long) map.get(SCAN_ID);
 		String url = (String) map.get(URL);
 		
@@ -73,7 +73,6 @@ public class ScannerServiceFacade implements Constants {
 				break;
 			// TODO: handle other scanners
 			default:
-				scan = new ScanOrder("Invalid ScannerId=" + scannerId + ". Try " + Scanner.DEFAULT.toString());
 		}
 		log.debug("Scan End: " + map);
 	}

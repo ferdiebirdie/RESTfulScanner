@@ -25,7 +25,7 @@ public class RabbitMqTest implements Constants {
 		urls.add("http://www.webscantest.com/shutterform");
 		urls.add("http://www.webscantest.com/crosstraining");
 		for (String url : urls) {
-			System.out.println(fac.queueScan(1L, url, fac.getNextScanId()));
+			System.out.println(fac.queueScan(1, url, fac.getNextScanId()));
 		}
 	}
 	

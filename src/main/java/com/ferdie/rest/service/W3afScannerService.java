@@ -280,7 +280,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		}
 	}
 
-	public Long getScannerId() {
+	public Integer getScannerId() {
 		return Scanner.W3AF.getId();
 	}
 

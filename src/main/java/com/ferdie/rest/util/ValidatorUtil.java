@@ -3,6 +3,8 @@ package com.ferdie.rest.util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import com.ferdie.rest.service.domain.Scanner;
+
 public enum ValidatorUtil {
 	ValidatorUtil;
 
@@ -14,18 +16,29 @@ public enum ValidatorUtil {
 	}
 	
 	public boolean isValidScanId(String scanId) {
-		return isNonNullLong(scanId);
+		return isPositiveLong(scanId);
 	}
 
 	public boolean isValidScannerId(String scannerId) {
-		return isNonNullInt(scannerId);
+		if (StringUtils.isBlank(scannerId)) {
+			return true;
+		} else {
+			try {
+				int id = Integer.parseInt(scannerId);
+				if (Math.signum(id) == 1) {
+					return Scanner.isValid(id);
+				}
+			} catch (NumberFormatException e) { ; }
+		}
+		return false;
+		
 	}
 
 	public boolean isValidUrl(String url) {
 		return urlValidator.isValid(url);
 	}
 
-	private boolean isNonNullLong(String theLong) {
+	private boolean isPositiveLong(String theLong) {
 		if (StringUtils.isNotBlank(theLong)) {
 			try {
 				long l = Long.parseLong(theLong);
@@ -36,14 +49,4 @@ public enum ValidatorUtil {
 		return false;
 	}
 
-	private boolean isNonNullInt(String theInt) {
-		if (StringUtils.isNotBlank(theInt)) {
-			try {
-				int i = Integer.parseInt(theInt);
-				return Math.signum(i) == 1; // must be positive non-zero
-			} catch (NumberFormatException e) {
-			}
-		}
-		return false;
-	}
 }

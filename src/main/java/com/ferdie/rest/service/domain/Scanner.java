@@ -3,46 +3,43 @@ package com.ferdie.rest.service.domain;
 import org.apache.log4j.Logger;
 
 public enum Scanner {
-	W3AF(1L),
-	DEFAULT(-1L)
+	W3AF(1)
+	// other scanners here
 	;
 
 	final static Logger log = Logger.getLogger(Scanner.class);
-	private Long scannerId;
+	private Integer scannerId;
 	
-	private Scanner(Long scannerId) {
+	private Scanner(Integer scannerId) {
 		this.scannerId = scannerId;
 	}
 	
-	public Long getId() {
+	public Integer getId() {
 		return this.scannerId;
 	}
 	
-	public static Scanner toScanner(Long id) {
-		Scanner[] scanners = values();
-		for (Scanner scanner : scanners) {
-			if (scanner.getId().longValue() == id.longValue()) {
-				return scanner;
-			}
+	public static Scanner toScanner(Integer id) {
+		if (null != id) {
+			Scanner[] scanners = values();
+			for (Scanner scanner : scanners) {
+				if (scanner.getId().intValue() == id.intValue()) {
+					return scanner;
+				}
+			}			
 		}
-		return Scanner.DEFAULT;
+		return Scanner.W3AF; // default
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("[ ");
-		Scanner[] vals = values();
-		for (Scanner scanner : vals) {
-			if (sb.length() > 2) {
-				sb.append(", ");
-			}
-			sb.append(scanner.getId());
-			if (scanner == DEFAULT) {
-				sb.append(" (default)");
-			}
+	public static boolean isValid(Integer id) {
+		if (null != id) {
+			Scanner[] scanners = values();
+			for (Scanner scanner : scanners) {
+				if (scanner.getId().intValue() == id.intValue()) {
+					return true;
+				}
+			}			
 		}
-		sb.append(" ]");
-		return sb.toString();
+		return false; // default
 	}
 	
 }
