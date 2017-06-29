@@ -9,10 +9,10 @@ public interface Constants {
 	String SCAN_SEQUENCE = "scanSeq";
 	
 	// Scan Statuses
-	String SHEDULED = "Scheduled";
-	String RUNNING = "Running";
-	String COMPLETED = "Completed";
-	String FAILED = "Failed";
+	String SHEDULED = "scheduled";
+	String RUNNING = "running";
+	String COMPLETED = "completed";
+	String FAILED = "failed";
 	
 	// WEBSERVICES
 	String KEY_WS_URL_W3AF = "ws.url.w3af";
