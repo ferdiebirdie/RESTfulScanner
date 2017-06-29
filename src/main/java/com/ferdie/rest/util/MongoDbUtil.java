@@ -94,7 +94,11 @@ public enum MongoDbUtil implements Constants {
 		try {
 			o = findById(scanId);
 			if (null != o) {
-				return ((DBObject)o).get(field);
+				Object v = ((DBObject)o).get(field);
+				if (null == v) {
+					return "";
+				}
+				return v;
 			}
 		} catch (Exception e) {
 			log.error(e);

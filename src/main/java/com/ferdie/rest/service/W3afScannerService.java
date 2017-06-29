@@ -18,6 +18,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -285,10 +286,13 @@ public class W3afScannerService implements ScannerService, Constants {
 	public String getVulnerabilities(Long scanId) {
 		try {
 			Object o = MongoDbUtil.findById(scanId, "vulnerabilities");
-			if (null != o) {
-				return o.toString();
+			if (null == o) {
+				return MSG_NOT_FOUND;	
+			} else if (StringUtils.isEmpty(o.toString())) {
+				return MSG_NO_VULNERS;
 			}
-			return MSG_NOT_FOUND;
+			return o.toString();
+			
 		} catch (Exception e) {
 			log.error(e);
 			return "Error getting vulnerabilities. Check logs.";

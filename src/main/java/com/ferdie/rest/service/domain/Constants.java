@@ -24,6 +24,7 @@ public interface Constants {
 	// messages
 	String MSG_NOTHING_DELETED = "{\"message\": \"Nothing deleted.\"}";
 	String MSG_NOT_FOUND = "{\"message\": \"Not found.\"}";
+	String MSG_NO_VULNERS = "{\"message\": \"No vulnerabilities found.\"}";
 	String MSG_ERR_LOGS = "{\"message\": \"Error was encountered. Check logs for details.\"}";
 	
 	// RabbitMQ
