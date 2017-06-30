@@ -211,7 +211,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		try {
 			// give enough time for w3af to process first
 			try {
-				//log.debug("Giving w3af enough time to process (10sec)....");
+				log.debug("Giving w3af enough time to process (10sec)....");
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
