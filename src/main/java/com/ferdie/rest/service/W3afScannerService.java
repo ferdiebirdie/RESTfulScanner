@@ -225,7 +225,7 @@ public class W3afScannerService implements ScannerService, Constants {
 				while (true) {
 					boolean running = isScanRunning();
 					if (running) {
-						// TODO: add max time, if reached, exit with error message
+						// TODO: add max time, if reached, exit with error message 
 						log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
 						try {
 							Thread.sleep(waitingTime * 1000);
