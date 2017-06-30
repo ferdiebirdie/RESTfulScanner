@@ -4,6 +4,7 @@ import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
 
 import java.util.Date;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 
@@ -21,6 +22,11 @@ public enum MongoDbUtil implements Constants {
 	
 	private MongoClient mongoClient;
 	final static Logger log = Logger.getLogger(MongoDbUtil.class);
+	
+	private MongoDbUtil() {
+		Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
+		mongoLogger.setLevel(Level.FATAL);
+	}
 	
 	public Long getNextSequence() {
 		DB db = getDB();

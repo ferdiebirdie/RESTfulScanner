@@ -1,5 +1,9 @@
 package com.ferdie.rest.service;
 
+import static com.ferdie.rest.util.JsonUtil.JsonUtil;
+import static com.ferdie.rest.util.MongoDbUtil.MongoDbUtil;
+import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +36,6 @@ import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanAction;
 import com.ferdie.rest.service.domain.ScanOrder;
 import com.ferdie.rest.service.domain.Scanner;
-import static com.ferdie.rest.util.MongoDbUtil.MongoDbUtil;
-
-import static com.ferdie.rest.util.JsonUtil.JsonUtil;
-import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
 import com.mongodb.BasicDBObject;
 
 public class W3afScannerService implements ScannerService, Constants {
@@ -208,7 +208,7 @@ public class W3afScannerService implements ScannerService, Constants {
 	
 	public boolean isScanRunning() {
 		JSONObject scan = getActiveScan();
-		return null != scan && RUNNING.equals(scan.get("status"));
+		return null != scan.get("status") && RUNNING.equalsIgnoreCase(scan.get("status").toString());
 	}
 
 	public boolean save(ScanOrder order) {
@@ -221,7 +221,6 @@ public class W3afScannerService implements ScannerService, Constants {
 				log.error("Error: ", e);
 			}
 			if (isScanActive()) {
-				//log.debug("Saving vulnerabilities...");
 				final int waitingTime = 60;
 				while (true) {
 					boolean running = isScanRunning();
