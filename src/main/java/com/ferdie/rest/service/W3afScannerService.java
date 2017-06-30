@@ -202,10 +202,6 @@ public class W3afScannerService implements ScannerService, Constants {
 		return null;
 	}
 	
-	public boolean isScanActive() {
-		return null != getActiveScan();
-	}
-	
 	public boolean isScanStopped() {
 		JSONObject scan = getActiveScan();
 		return null == scan || null == scan.get("status") || "Stopped".equals(scan.get("status").toString());
@@ -220,8 +216,16 @@ public class W3afScannerService implements ScannerService, Constants {
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
 			}
-			if (isScanActive()) {
-				final int waitingTime = 60;
+			
+			JSONObject scan = getActiveScan();
+			if (null != scan) {
+				log.debug("Active scan detected: " + scan);
+				while (!isScanStopped()) {
+					// do nothing...
+				}
+				saveVulners(order.getScanId());
+				
+				/*final int waitingTime = 60;
 				while (true) {
 					boolean stopped = isScanStopped();
 					if (!stopped) {
@@ -237,7 +241,7 @@ public class W3afScannerService implements ScannerService, Constants {
 						saveVulners(order.getScanId());
 						break;
 					}
-				}
+				}*/
 			} else {
 				log.warn("No active scan detected!");
 				//MongoDbUtil.updateStatus(order.getScanId(), FAILED);
@@ -251,7 +255,7 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	@SuppressWarnings("unchecked")
 	public void saveVulners(Long scanId) throws ParseException {
-		log.debug("Saving vulnerabilities...");
+		//log.debug("Saving vulnerabilities...");
 		JSONParser parser = new JSONParser();
 		JSONObject json;
 		try {
