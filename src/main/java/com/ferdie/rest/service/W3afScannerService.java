@@ -206,9 +206,9 @@ public class W3afScannerService implements ScannerService, Constants {
 		return null != getActiveScan();
 	}
 	
-	public boolean isScanRunning() {
+	public boolean isScanStopped() {
 		JSONObject scan = getActiveScan();
-		return null != scan.get("status") && RUNNING.equalsIgnoreCase(scan.get("status").toString());
+		return null == scan || null == scan.get("status") || "Stopped".equals(scan.get("status").toString());
 	}
 
 	public boolean save(ScanOrder order) {
@@ -223,8 +223,8 @@ public class W3afScannerService implements ScannerService, Constants {
 			if (isScanActive()) {
 				final int waitingTime = 60;
 				while (true) {
-					boolean running = isScanRunning();
-					if (running) {
+					boolean stopped = isScanStopped();
+					if (!stopped) {
 						// TODO: add max time, if reached, exit with error message 
 						log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
 						try {

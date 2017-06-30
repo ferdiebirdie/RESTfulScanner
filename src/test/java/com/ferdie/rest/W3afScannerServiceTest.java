@@ -37,9 +37,9 @@ public class W3afScannerServiceTest {
 	}
 	
 	@Test
-	public void hasRunningScan() {
+	public void isScanStopped() {
 		log.debug("Testing: hasRunningScan()....");
-		boolean result = svc.isScanRunning();
+		boolean result = svc.isScanStopped();
 		log.debug(result);
 	}
 	
