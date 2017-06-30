@@ -52,7 +52,7 @@ public class ScannerServiceFacade implements Constants {
 	}
 	
 	public void scan(Map<String, Object> map) {
-		log.debug("Scan Start: " + map);
+		log.debug("START " + map);
 		Integer scannerId = (Integer) map.get(SCANNER_ID);
 		Long scanId = (Long) map.get(SCAN_ID);
 		String url = (String) map.get(URL);
@@ -75,7 +75,8 @@ public class ScannerServiceFacade implements Constants {
 			// TODO: handle other scanners
 			default:
 		}
-		log.debug("Scan End: " + map);
+		log.debug("END " + map);
+		log.debug("-------------------------------------------------------------------------------------------------------------------------------------------------");
 	}
 	
 	public String getScanStatus(Long scanId) {

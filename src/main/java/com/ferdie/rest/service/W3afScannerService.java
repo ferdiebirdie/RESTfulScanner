@@ -57,7 +57,7 @@ public class W3afScannerService implements ScannerService, Constants {
 		Response response = invocationBuilder.post(Entity.entity(input, MediaType.APPLICATION_JSON));
 		String result = response.readEntity(String.class);
 		if (response.getStatus() == 201) { // success
-			log.debug("Successfully created scan order.");
+//			log.debug("Successfully created scan order.");
 			scan = new ScanOrder(getScannerId(), url, result);
 		} else {
 			log.error("Failed creating scan order: " + result);
@@ -211,7 +211,6 @@ public class W3afScannerService implements ScannerService, Constants {
 		try {
 			// give enough time for w3af to process first
 			try {
-				log.debug("Giving w3af enough time to process (10sec)....");
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				log.error("Error: ", e);
@@ -219,32 +218,13 @@ public class W3afScannerService implements ScannerService, Constants {
 			
 			JSONObject scan = getActiveScan();
 			if (null != scan) {
-				log.debug("Active scan detected: " + scan);
+				log.debug("Scan Order: " + scan);
 				while (!isScanStopped()) {
 					// do nothing...
 				}
 				saveVulners(order.getScanId());
-				
-				/*final int waitingTime = 60;
-				while (true) {
-					boolean stopped = isScanStopped();
-					if (!stopped) {
-						// TODO: add max time, if reached, exit with error message 
-						log.debug("W3AF scan still in progress, checking after " + waitingTime + "sec...");
-						try {
-							Thread.sleep(waitingTime * 1000);
-						} catch (InterruptedException e) {
-							log.error("Error while sleeping", e);
-							break;
-						}
-					} else {
-						saveVulners(order.getScanId());
-						break;
-					}
-				}*/
 			} else {
 				log.warn("No active scan detected!");
-				//MongoDbUtil.updateStatus(order.getScanId(), FAILED);
 			}
 			return true;
 		} catch (Exception e1) {
@@ -272,9 +252,9 @@ public class W3afScannerService implements ScannerService, Constants {
 					details.add(parser.parse(kb));
 				}
 				MongoDbUtil.updateVulners(scanId, details);
-				log.debug("Saved " + items.size() + " vulnerabilities.");
+				log.debug("Vulnerabilities: " + items.size());
 			} else {
-				log.debug("No vulnerabilities found.");
+				log.debug("Vulnerabilities: " + 0);
 			}
 		} catch (ParseException e) {
 			log.error("Error saving vulnerabilities.", e);
@@ -292,7 +272,10 @@ public class W3afScannerService implements ScannerService, Constants {
 			if (null == o) {
 				return MSG_NOT_FOUND;	
 			} else if (StringUtils.isEmpty(o.toString())) {
+				// if completed
 				return MSG_NO_VULNERS;
+				// else
+				// return MSG_SCAN_INPROGRESS;
 			}
 			return o.toString();
 			
