@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Logger;
 
 import com.ferdie.rest.service.ScannerServiceFacade;
@@ -55,9 +56,20 @@ public class QueueConsumer extends EndPoint implements Runnable, Consumer, Const
 	 * Called when new message is available.
 	 */
 	public void handleDelivery(String consumerTag, Envelope env, BasicProperties props, byte[] body) throws IOException {
-		Map map = (HashMap) SerializationUtils.deserialize(body);
-		//log.debug("Message Received: " + map);
-		svcFacade.scan(map);
+		StopWatch sw = new StopWatch();
+		sw.start();
+		Map map = null;
+		try {
+			map = (HashMap) SerializationUtils.deserialize(body);
+			log.debug("Input " + map);
+			//log.debug("Message Received: " + map);
+			svcFacade.scan(map);			
+		} catch (Exception e) {
+			log.error(e);
+		}
+		sw.stop();
+		log.debug("Time Spent: " + sw);
+		log.debug("*************************************************************************************************************************************************");
 	}
 
 	public void handleCancel(String consumerTag) {

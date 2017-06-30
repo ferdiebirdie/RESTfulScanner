@@ -1,4 +1,4 @@
-package com.ferdie.rest;
+package com.ferdie.rest.util;
 
 import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
 
