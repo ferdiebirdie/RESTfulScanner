@@ -208,7 +208,7 @@ public class W3afScannerService implements ScannerService, Constants {
 	
 	public boolean isScanRunning() {
 		JSONObject scan = getActiveScan();
-		return null != scan && "Running".equals(scan.get("status"));
+		return null != scan && RUNNING.equals(scan.get("status"));
 	}
 
 	public boolean save(ScanOrder order) {

@@ -5,7 +5,7 @@ import static com.ferdie.rest.util.JsonUtil.JsonUtil;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
-public class ScanOrder {
+public class ScanOrder implements Constants {
 	final static Logger log = Logger.getLogger(ScanOrder.class);
 	private Long scanId;
 	private Long orderId;
@@ -20,7 +20,6 @@ public class ScanOrder {
 		this(result);
 		this.scannerId = scannerId;
 		this.url = url;
-		this.status = "Running";
 		this.isCreated = true;
 	}
 	
