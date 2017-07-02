@@ -32,6 +32,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanAction;
 import com.ferdie.rest.service.domain.ScanOrder;
@@ -98,7 +99,12 @@ public class W3afScannerService implements ScannerService, Constants {
 			} else if (StringUtils.isEmpty(o.toString())) {
 				return JsonUtil.prettyPrint(MSG_NO_VULNERS);
 			} else {
-				return JsonUtil.prettyPrint("{\"vulnerabilities\" : \"" + o + "\"}");
+				o = "pending";
+				if (PENDING.equals(o)) {
+					return JsonUtil.prettyPrint("{\"vulnerabilities\" : \"" + o + "\"}");
+				} else {
+					return JsonUtil.prettyPrint(o.toString());
+				}
 			}
 		} catch (Exception e) {
 			log.error(e);
