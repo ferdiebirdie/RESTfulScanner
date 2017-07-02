@@ -32,7 +32,6 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanAction;
 import com.ferdie.rest.service.domain.ScanOrder;
