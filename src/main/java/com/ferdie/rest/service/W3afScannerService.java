@@ -99,7 +99,6 @@ public class W3afScannerService implements ScannerService, Constants {
 			} else if (StringUtils.isEmpty(o.toString())) {
 				return JsonUtil.prettyPrint(MSG_NO_VULNERS);
 			} else {
-				o = "pending";
 				if (PENDING.equals(o)) {
 					return JsonUtil.prettyPrint("{\"vulnerabilities\" : \"" + o + "\"}");
 				} else {
