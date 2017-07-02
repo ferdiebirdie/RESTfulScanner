@@ -13,6 +13,7 @@ public interface Constants {
 	String RUNNING = "running";
 	String COMPLETED = "completed";
 	String FAILED = "failed";
+	String PENDING = "pending";
 	
 	// WEBSERVICES
 	String KEY_WS_URL_W3AF = "ws.url.w3af";

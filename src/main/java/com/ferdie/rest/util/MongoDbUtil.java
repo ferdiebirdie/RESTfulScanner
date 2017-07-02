@@ -5,7 +5,6 @@ import static com.ferdie.rest.util.PropertiesUtil.PropertiesUtil;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
 
 import com.ferdie.rest.service.domain.Constants;
 import com.ferdie.rest.service.domain.ScanOrder;
@@ -49,39 +48,27 @@ public enum MongoDbUtil implements Constants {
 		}
 	}
 
-	public void updateVulners(Long scanId, JSONArray vulners) {
-		DB db;
-		try {
-			db = getDB();
-			DBCollection scan = db.getCollection(SCAN_TABLE);
-			BasicDBObject newDocument = new BasicDBObject();
-			BasicDBObject updates = new BasicDBObject();
-			updates.append("vulnerabilities", vulners);
-			newDocument.append("$set", updates);
-			
-			BasicDBObject searchQuery = new BasicDBObject().append("_id", scanId);
-			scan.update(searchQuery, newDocument);
-		    
-		} catch (Exception e) {
-			log.error(e);
-		}
+	public void updateVulners(Long scanId, Object vulners) {
+		updateScan(scanId, "vulnerabilities", vulners);
 	}
 	
 	public void updateStatus(Long scanId, String status) {
-		DB db;
+		updateScan(scanId, "status", status);
+	}
+	
+	private void updateScan(Long scanId, String key, Object val) {
 		try {
-			db = getDB();
+			DB db = getDB();
 			DBCollection scan = db.getCollection(SCAN_TABLE);
-			
 			BasicDBObject newDocument = new BasicDBObject();
 			BasicDBObject updates = new BasicDBObject();
-			updates.append("status", status);
+			updates.append(key, val);
 			newDocument.append("$set", updates);
 			
 			BasicDBObject searchQuery = new BasicDBObject().append("_id", scanId);
 			scan.update(searchQuery, newDocument);
 		} catch (Exception e) {
-			log.error("Failed updating status to " + status + "[scanId=" + scanId + "]:", e);
+			log.error(e);
 		}
 	}
 	
@@ -118,7 +105,7 @@ public enum MongoDbUtil implements Constants {
 	@SuppressWarnings("deprecation")
 	public DB getDB() {
 		if (null == mongoClient) {
-			mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.getProperty(KEY_DB_URI)));	
+			mongoClient = new MongoClient(new MongoClientURI(PropertiesUtil.getProperty(KEY_DB_URI)));
 		}
 		return mongoClient.getDB(SCANNER_DB);
 	}

@@ -79,14 +79,30 @@ public class W3afScannerService implements ScannerService, Constants {
 		try {
 			BasicDBObject scan = (BasicDBObject) MongoDbUtil.findById(scanId);
 			if (null != scan) {
-				return Objects.toString(scan);
+				return JsonUtil.prettyPrint("{\"status\" : \"" + Objects.toString(scan.get("status")) + "\"}");
 			} else {
-				return MSG_NOT_FOUND;
+				return JsonUtil.prettyPrint(MSG_NOT_FOUND);
 			}
 			
 		} catch (Exception e) {
 			log.error(e);
 			return "Error on search! Check logs.";
+		}
+	}
+
+	public String getVulnerabilities(Long scanId) {
+		try {
+			Object o = MongoDbUtil.findById(scanId, "vulnerabilities");
+			if (null == o) {
+				return JsonUtil.prettyPrint(MSG_NOT_FOUND);
+			} else if (StringUtils.isEmpty(o.toString())) {
+				return JsonUtil.prettyPrint(MSG_NO_VULNERS);
+			} else {
+				return JsonUtil.prettyPrint("{\"vulnerabilities\" : \"" + o + "\"}");
+			}
+		} catch (Exception e) {
+			log.error(e);
+			return "Error getting vulnerabilities. Check logs.";
 		}
 	}
 
@@ -235,13 +251,11 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	@SuppressWarnings("unchecked")
 	public void saveVulners(Long scanId) throws ParseException {
-		//log.debug("Saving vulnerabilities...");
-		JSONParser parser = new JSONParser();
-		JSONObject json;
 		try {
 			Long orderId = getActiveOrderId();
 			String kbALl = manageScanOrder(ScanAction.GET_VULN_ALL, orderId);
-			json = (JSONObject) parser.parse(kbALl);
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(kbALl);
 			JSONArray items = (JSONArray) json.get("items");
 			if (null != items && items.size() > 0) {
 				JSONArray details = new JSONArray();
@@ -264,25 +278,6 @@ public class W3afScannerService implements ScannerService, Constants {
 
 	public Integer getScannerId() {
 		return Scanner.W3AF.getId();
-	}
-
-	public String getVulnerabilities(Long scanId) {
-		try {
-			Object o = MongoDbUtil.findById(scanId, "vulnerabilities");
-			if (null == o) {
-				return MSG_NOT_FOUND;	
-			} else if (StringUtils.isEmpty(o.toString())) {
-				// if completed
-				return MSG_NO_VULNERS;
-				// else
-				// return MSG_SCAN_INPROGRESS;
-			}
-			return o.toString();
-			
-		} catch (Exception e) {
-			log.error(e);
-			return "Error getting vulnerabilities. Check logs.";
-		}
 	}
 
 }

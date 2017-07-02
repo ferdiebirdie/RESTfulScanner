@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ferdie.rest.rabbitmq.QueueProducer;
@@ -34,6 +33,7 @@ public class ScannerServiceFacade implements Constants {
 			if (null == scanId) {
 				scanId = getNextScanId();
 				MongoDbUtil.createScan(new ScanOrder(scanId, scannerId, url, SHEDULED));
+				MongoDbUtil.updateVulners(scanId, PENDING);
 			}
 			msg.put("scanId", scanId);
 			msg.put("scannerId", scannerId);
@@ -42,7 +42,7 @@ public class ScannerServiceFacade implements Constants {
 			log.debug("Message sent: " + msg);
 			
 			ObjectMapper mapper = JsonUtil.getObjectMapper();
-			String s = "{\"scanId\": " + scanId + ", \"status\": \"scheduled\"}";
+			String s = "{\"scanId\": " + scanId + ", \"status\": \"" + SHEDULED + "\"}";
 			Object json = mapper.readValue(s, Object.class);
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
 		} catch (IOException | TimeoutException e1) {
@@ -77,29 +77,26 @@ public class ScannerServiceFacade implements Constants {
 	}
 	
 	public String getScanStatus(Long scanId) {
-		String result = svc.getScanStatus(scanId);
-		ObjectMapper mapper = JsonUtil.getObjectMapper();
-		JSONObject json;
-		try {
-			json = mapper.readValue(result, JSONObject.class);
-			return JsonUtil.prettyPrint("{\"status\" : \"" + Objects.toString(json.get("status"), "Not found") + "\"}");
-		} catch (Exception e) {
-			log.error(e);
-			return MSG_ERR_LOGS;
-		}
+		return svc.getScanStatus(scanId);
 	}
 
 	public String getVulnerabilities(Long scanId) {
-		String result = svc.getVulnerabilities(scanId);
-		ObjectMapper mapper = JsonUtil.getObjectMapper();
-		Object json;
-		try {
-			json = mapper.readValue(result, Object.class);
-			return  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-		} catch (Exception e) {
-			log.error(e);
-			return MSG_ERR_LOGS;
-		}
+		return svc.getVulnerabilities(scanId);
+		/*String status = svc.getScanStatus(scanId);
+		if (RUNNING.equals(status)) {
+			return JsonUtil.prettyPrint("{\"message\" : \"" + Objects.toString(svc.getVulnerabilities(scanId), "") + "\"}");
+		} else {
+			String result = svc.getVulnerabilities(scanId);
+			ObjectMapper mapper = JsonUtil.getObjectMapper();
+			Object json;
+			try {
+				json = mapper.readValue(result, Object.class);
+				return  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+			} catch (Exception e) {
+				log.error(e);
+				return MSG_ERR_LOGS;
+			}
+		}*/
 	}
 	
 	public String deleteActiveScan() {

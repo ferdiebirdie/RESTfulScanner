@@ -14,7 +14,7 @@
 			</activation>
 			<properties>
 				<wsUrlW3af>http://192.168.99.100:5000</wsUrlW3af>
-				<dbUri>mongodb://scan:scan@192.168.99.100:27017</dbUri>
+				<dbUri>mongodb://192.168.99.100:27017</dbUri>
 				<rabbitmqHost>192.168.99.100</rabbitmqHost>
 			</properties>
 		</profile>
@@ -22,16 +22,16 @@
 			<id>test</id>
 			<properties>
 				<wsUrlW3af>http://128.199.201.92:5000</wsUrlW3af>
-				<dbUri>mongodb://scan:scan@128.199.201.92:27017</dbUri>
+				<dbUri>mongodb://128.199.201.92:27017</dbUri>
 				<rabbitmqHost>128.199.201.92</rabbitmqHost>
 			</properties>
 		</profile>
 		<profile>
 			<id>prod</id>
 			<properties>
-				<wsUrlW3af>http://127.0.0.1:5000</wsUrlW3af>
-				<dbUri>mongodb://scan:scan@127.0.0.1:27017</dbUri>
-				<rabbitmqHost>127.0.0.1</rabbitmqHost>
+				<wsUrlW3af>http://128.199.201.92:5000</wsUrlW3af>
+				<dbUri>mongodb://128.199.201.92:27017</dbUri>
+				<rabbitmqHost>128.199.201.92</rabbitmqHost>
 			</properties>
 		</profile>
 	</profiles>
