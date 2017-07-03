@@ -69,7 +69,7 @@ public class QueueConsumer extends EndPoint implements Runnable, Consumer, Const
 		}
 		sw.stop();
 		log.debug("Time Spent: " + sw);
-		log.debug("************************************************************************************************************");
+		log.debug("*******************************");
 	}
 
 	public void handleCancel(String consumerTag) {
